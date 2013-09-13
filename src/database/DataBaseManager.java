@@ -1,15 +1,19 @@
 package database;
 
 import java.sql.SQLException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
+import com.jconnect.core.Route;
 
 public class DataBaseManager extends DbliteConnection{
 
 	private static DataBaseManager instance;
 
-	public static Lock exclusiveAccess = new ReentrantLock();
+	private static final String PEER_REGISTER_TABLE = "PeerRegister";
 
+	private static final String PEER_REGISTER_CONTACTUUID_FIELD = "ContactUUID";
+	private static final String PEER_REGISTER_SOCKET_ADDRESS_FIELD = "SocketAdress";
+	private static final String PEER_REGISTER_IS_LOCAL_ADDRESS_FIELD = "isLocal";
+	
 
 	private static String DBLITEPATH = "dblite.db";
 	
@@ -35,7 +39,12 @@ public class DataBaseManager extends DbliteConnection{
 
 	@Override
 	protected void onCreate() throws SQLException {
-
+		update("create table "+PEER_REGISTER_TABLE+" "+
+				"("+PEER_REGISTER_CONTACTUUID_FIELD+" text, " +
+				PEER_REGISTER_SOCKET_ADDRESS_FIELD+" text, " +
+				PEER_REGISTER_IS_LOCAL_ADDRESS_FIELD + " numeric, "+
+				"PRIMARY KEY ("+PEER_REGISTER_CONTACTUUID_FIELD+","+PEER_REGISTER_SOCKET_ADDRESS_FIELD+")" +
+				");");
 
 
 		
@@ -53,6 +62,25 @@ public class DataBaseManager extends DbliteConnection{
 	protected void onDelete() throws SQLException {
 		
 
+	}
+	
+	
+	
+	public void saveRoute(Route r)
+	{
+		
+		
+//		try
+//		{
+//			
+//		}
+//		catch(SQLException ex)
+//		{
+//			// if the error message is "out of memory", 
+//			// it probably means no database file is found
+//			System.err.println(e.getFilepath());
+//			System.err.println(ex.getMessage());
+//		}
 	}
 
 

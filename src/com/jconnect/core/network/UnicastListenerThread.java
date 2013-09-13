@@ -23,17 +23,16 @@ public class UnicastListenerThread  extends AbstractSocketThread {
 	public void run()
 	{
 		System.out.println("Debut d'un thread d'écoute sur "+usingSocket.getRemoteSocketAddress());
-		ArrayList<String> results = new ArrayList<String>();
 		if(usingSocket==null)
 		{
 			System.out.println("1");
-			parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_UNKNOWN_ERROR, results);
+			parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_UNKNOWN_ERROR);
 
 		}
 		else if(usingSocket.isClosed())
 		{
 			System.out.println("2");
-			parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_CLOSED, results);
+			parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_CLOSED);
 		}
 
 		else
@@ -46,18 +45,18 @@ public class UnicastListenerThread  extends AbstractSocketThread {
 
 					read = in.readLine();
 					if(read!=null)
-						results.add(read);
+						parent.handlerMessage(usingSocket.getRemoteSocketAddress(), read);
 
 				}
-				parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_CLOSED, results);
+				parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_CLOSED);
 
 			}catch (SocketTimeoutException e)
 			{
 
-				parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_TIMEOUT, results);
+				parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_TIMEOUT);
 			} catch (IOException e) {
 				System.out.println("3");
-				parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_UNKNOWN_ERROR, results);
+				parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_UNKNOWN_ERROR);
 			}
 
 		}

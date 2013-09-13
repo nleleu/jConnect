@@ -1,10 +1,12 @@
 package com.jconnect.core;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.ArrayList;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -14,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.jconnect.core.network.AbstractSocketThread;
+import com.jconnect.core.network.MulticastServerThread;
 import com.jconnect.core.network.ServerThread;
 import com.jconnect.core.network.SocketConnectivityInfo;
 import com.jconnect.core.network.UnicastListenerThread;
@@ -27,10 +30,29 @@ public class Gate {
 	private boolean inputGateOpen = false;
 	private boolean outputGateOpen = false;
 	private ServerSocket serverSocket;
+	
+	private MulticastSocket multicastSocket = null;
+	
 
 	public Gate()
 	{
 		openInputGate();
+	}
+	
+	public void createMulticastSocket()
+	{
+	
+			try {
+				InetAddress group = InetAddress.getByName("228.5.6.7");
+			
+		
+			multicastSocket = new MulticastSocket(6789);//TODO Prefs
+			new MulticastServerThread(this, multicastSocket).start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} //TODO Prefs
+
 	}
 
 	//Useless ?
@@ -89,6 +111,12 @@ public class Gate {
 	{
 		return this;
 	}
+	
+	public void Send(String message)
+	{
+		
+	}
+	
 
 	public void addPendingSocket(SocketConnectivityInfo sci)
 	{
@@ -137,16 +165,19 @@ public class Gate {
 		}, 0, 10000); //TODO : Prefs
 	}
 
-
-	synchronized public void handleEndOfListener(SocketAddress sa,int returnCode,ArrayList<String> data)
+	synchronized public void handlerMessage(SocketAddress sa,String data)
+	{
+		System.out.println("Message  "+data);
+		currentOpenedSockets.get(sa).setLastReceivedDataDate(System.currentTimeMillis());
+	}
+	
+	
+	
+	synchronized public void handleEndOfListener(SocketAddress sa,int returnCode)
 	{
 
 		pendingListening.remove(sa);
-		for(String s : data)
-		{
-			System.out.println("Message  "+s);
-			currentOpenedSockets.get(sa).setLastReceivedDataDate(System.currentTimeMillis());
-		}
+		
 		if(returnCode==AbstractSocketThread.SOCKET_STATUS_CLOSED || returnCode==AbstractSocketThread.SOCKET_STATUS_UNKNOWN_ERROR)
 		{
 			

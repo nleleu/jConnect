@@ -1,8 +1,9 @@
+package tests.network;
 import com.jconnect.core.Gate;
 import com.jconnect.core.WindowApp;
 
 
-public class test4 {
+public class test2 {
 	/**
 	 * @param args
 	 */

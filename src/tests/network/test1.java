@@ -1,3 +1,4 @@
+package tests.network;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,7 +8,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 
-public class test3 {
+public class test1 {
 
 	/**
 	 * @param args
