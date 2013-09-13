@@ -24,7 +24,10 @@ public abstract class DbliteConnection {
 	protected DbliteConnection(String path, int version) {
 		try {
 			openConnection(path, version);
-		} catch (ClassNotFoundException | SQLException e) {
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		} catch (SQLException e) {
 
 			e.printStackTrace();
 			System.exit(-1);

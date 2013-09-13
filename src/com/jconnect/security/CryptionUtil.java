@@ -29,6 +29,7 @@ public class CryptionUtil {
 			return Base64.encodeBytes(ciphertext, Base64.NO_OPTIONS);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
+			return null;
 		} catch (NoSuchPaddingException e) {
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
@@ -36,7 +37,7 @@ public class CryptionUtil {
 		} catch (BadPaddingException e) {
 			e.printStackTrace();
 		}
-		return null;
+		throw new InvalidKeyException("key may be invalide");
 
 	}
 
@@ -52,6 +53,7 @@ public class CryptionUtil {
 			return cleartext;
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
+			return null;
 		} catch (NoSuchPaddingException e) {
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
@@ -59,7 +61,8 @@ public class CryptionUtil {
 		} catch (BadPaddingException e) {
 			e.printStackTrace();
 		}
-		return null;
+		throw new InvalidKeyException("key may be invalide");
+		
 	}
 
 	public static Key generateKey() {

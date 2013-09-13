@@ -2,6 +2,7 @@ package com.jconnect;
 
 import com.jconnect.core.Gate;
 import com.jconnect.peergroup.PeerGroupManager;
+import com.jconnect.util.PreferencesStore;
 
 public class JConnect {
 
