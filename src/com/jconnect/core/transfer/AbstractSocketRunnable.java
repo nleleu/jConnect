@@ -4,7 +4,7 @@ import java.util.Observable;
 
 import com.jconnect.core.Gate;
 
-public abstract class AbstractSocketThread implements Runnable {
+public abstract class AbstractSocketRunnable implements Runnable {
 
 	protected Gate parent;
 
@@ -14,7 +14,7 @@ public abstract class AbstractSocketThread implements Runnable {
 	
 	
 	
-	public AbstractSocketThread (Gate parent)
+	public AbstractSocketRunnable (Gate parent)
 	{
 		this.parent = parent;
 

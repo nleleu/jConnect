@@ -1,6 +1,7 @@
 package com.jconnect.peergroup.services;
 
 import com.jconnect.peergroup.AbstractPeerGroup;
+import com.jconnect.peergroup.peer.PeerListener;
 
 
 public abstract class AbstractService {

@@ -1,4 +1,7 @@
 package tests.network;
+import java.io.IOException;
+
+import com.jconnect.JConnect;
 import com.jconnect.core.Gate;
 import com.jconnect.core.WindowApp;
 
@@ -9,14 +12,21 @@ public class test2 {
 	 */
 	public static void main(String[] args) {
 	
-		final Gate g = new Gate();
+		final JConnect jconnect = new JConnect();
+		try {
+			jconnect.getGate().start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		jconnect.getGate().sendMulticastMessage("coucou");
 		Runtime.getRuntime().addShutdownHook(new Thread()
         {
             @Override
             public void run()
             {
                 System.out.println("Shutdown hook ran!");
-                g.closeInputGate();
+                jconnect.getGate().stop();
             }
         });
 		WindowApp w = new WindowApp();

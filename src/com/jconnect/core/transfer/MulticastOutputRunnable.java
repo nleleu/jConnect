@@ -6,8 +6,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import com.jconnect.core.Gate;
+import com.jconnect.core.transfer.event.TransferEvent;
 
-public class MulticastUDPSenderThread  extends AbstractSocketThread {
+public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 
 
 	private String message=new String();
@@ -16,7 +17,7 @@ public class MulticastUDPSenderThread  extends AbstractSocketThread {
 	private int port;
 
 
-	public MulticastUDPSenderThread (Gate parent, DatagramSocket usingSocket,InetAddress group,int port,String message)
+	public MulticastOutputRunnable (Gate parent, DatagramSocket usingSocket,InetAddress group,int port,String message)
 	{
 		super(parent);
 		this.usingSocket =usingSocket;
@@ -27,17 +28,10 @@ public class MulticastUDPSenderThread  extends AbstractSocketThread {
 
 	public void run()
 	{
-		System.out.println("Debut d'un thread d'envoi sur "+usingSocket);
-		if(usingSocket==null)
+		
+		if(usingSocket.isClosed())
 		{
-			System.out.println("1");
-			parent.handleEndOfSender(null, SOCKET_STATUS_UNKNOWN_ERROR,message);
-
-		}
-		else if(usingSocket.isClosed())
-		{
-			System.out.println("2");
-			parent.handleEndOfSender(null, SOCKET_STATUS_CLOSED,message);
+			parent.addEvent(new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SOCKET_CLOSED));
 		}
 
 		else
@@ -47,10 +41,10 @@ public class MulticastUDPSenderThread  extends AbstractSocketThread {
 				DatagramPacket packet = new DatagramPacket(buf, buf.length,group,port);
 				usingSocket.send(packet);
 				
-				parent.handleEndOfSender(null, SOCKET_STATUS_OK,message);				
+				TransferEvent e = new TransferEvent(null, TransferEvent.State.SEND_SUCCESS);
+				parent.addEvent(e);
 
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 

@@ -2,6 +2,7 @@ package com.jconnect.peergroup;
 
 import java.util.UUID;
 
+import com.jconnect.peergroup.peer.Peer;
 import com.jconnect.peergroup.services.ConnectivityService;
 import com.jconnect.peergroup.services.DiscoveryService;
 import com.jconnect.peergroup.services.InboxService;
@@ -16,6 +17,9 @@ public abstract class PeerGroup extends AbstractPeerGroup {
 	private ConnectivityService connectivityService;
 	private RendezVousService rendezVousService;
 
+
+	
+	
 	public PeerGroup(UUID uuid, AbstractPeerGroup pGroup) {
 		super(uuid, pGroup);
 		inboxService = new InboxService();
@@ -29,10 +33,13 @@ public abstract class PeerGroup extends AbstractPeerGroup {
 		addService(new ConnectivityService());
 		rendezVousService = new RendezVousService();
 		addService(new RendezVousService());
-		
-		
 	}
 	
+	
+	
+	
+	
+	// ##################### GETTER - SETTER #######################
 	public InboxService getInboxService() {
 		return inboxService;
 	}

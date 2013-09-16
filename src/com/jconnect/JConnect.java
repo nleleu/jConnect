@@ -17,9 +17,17 @@ public class JConnect {
 
 	public JConnect(String prefPath) {
 		prefs = new PreferencesStore(prefPath);
-		gate = new Gate();
-		peerGroupManager = new PeerGroupManager();
+		gate = new Gate(this);
+		//peerGroupManager = new PeerGroupManager();
 		
+	}
+	
+	public PreferencesStore getPrefs() {
+		return prefs;
+	};
+	
+	public Gate getGate() {
+		return gate;
 	}
 
 }

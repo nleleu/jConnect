@@ -36,12 +36,6 @@ public class SocketConnectivityInfo {
 	public void setLastReceivedDataDate(long lastReceivedDataDate) {
 		this.lastReceivedDataDate = lastReceivedDataDate;
 	}
-	public long getLastListeningDate() {
-		return lastListeningDate;
-	}
-	public void setLastListeningDate(long lastListeningDate) {
-		this.lastListeningDate = lastListeningDate;
-	}
 
 
 	
