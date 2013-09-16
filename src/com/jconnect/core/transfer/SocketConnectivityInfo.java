@@ -1,4 +1,4 @@
-package com.jconnect.core.network;
+package com.jconnect.core.transfer;
 
 import java.net.Socket;
 

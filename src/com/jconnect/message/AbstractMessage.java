@@ -12,10 +12,12 @@ import com.jconnect.security.CryptionUtil;
 
 public class AbstractMessage {
 
+
 	
 	private final static String TAG_DATE="date";
 	private final static String TAG_GROUP="group_id";
 	private final static String TAG_DATA="data";
+
 	
 	
 	private long date;
@@ -52,6 +54,7 @@ public class AbstractMessage {
 		return json.toString();
 		
 	}
+
 	
 	
 

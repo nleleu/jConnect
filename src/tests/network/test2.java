@@ -16,7 +16,7 @@ public class test2 {
             public void run()
             {
                 System.out.println("Shutdown hook ran!");
-                g.stopInputGate();
+                g.closeInputGate();
             }
         });
 		WindowApp w = new WindowApp();

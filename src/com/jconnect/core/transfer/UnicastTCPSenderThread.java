@@ -1,21 +1,21 @@
-package com.jconnect.core.network;
+package com.jconnect.core.transfer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 import com.jconnect.core.Gate;
 
-public class UnicastSenderThread  extends AbstractSocketThread {
+public class UnicastTCPSenderThread  extends AbstractSocketThread {
 
 
-	String message=new String();
+	private String message=new String();
+	private Socket usingSocket;
 
-
-	public UnicastSenderThread (Gate parent, Socket usingSocket,String message)
+	public UnicastTCPSenderThread (Gate parent, Socket usingSocket,String message)
 	{
-		super(parent,usingSocket);
+		super(parent);
+		this.usingSocket = usingSocket;
 		this.message = message;
 	}
 
@@ -25,33 +25,29 @@ public class UnicastSenderThread  extends AbstractSocketThread {
 		if(usingSocket==null)
 		{
 			System.out.println("1");
-			parent.handleEndOfSender(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_UNKNOWN_ERROR,message);
-			
+			parent.handleEndOfSender(null, SOCKET_STATUS_UNKNOWN_ERROR,message);
+
 		}
 		else if(usingSocket.isClosed())
 		{
 			System.out.println("2");
 			parent.handleEndOfSender(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_CLOSED,message);
 		}
-			
+
 		else
 		{
 			try {
-				
+
 
 				PrintWriter out = new PrintWriter(usingSocket.getOutputStream());
-                out.println();
-                out.flush();
+				out.println(message);
+				out.flush();
 				parent.handleEndOfSender(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_OK,message);
-			}catch (SocketTimeoutException e)
-			{
-			
-				parent.handleEndOfSender(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_TIMEOUT,message);
 			} catch (IOException e) {
 				System.out.println("3");
 				parent.handleEndOfSender(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_UNKNOWN_ERROR,message);
 			}
-		
+
 		}
 
 

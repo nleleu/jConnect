@@ -1,4 +1,4 @@
-package com.jconnect.core.network;
+package com.jconnect.core.transfer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -6,9 +6,8 @@ import java.net.Socket;
 
 import com.jconnect.core.Gate;
 
-public class ServerThread extends Thread {
+public class ServerThread extends AbstractSocketThread {
 
-	private Gate parent;
 	private ServerSocket serverSocket;
 
 
@@ -17,25 +16,21 @@ public class ServerThread extends Thread {
 
 	public ServerThread (Gate parent,ServerSocket serverSocket)
 	{
-		this.parent = parent;
+		super(parent);
 		this.serverSocket = serverSocket;
 
 	}
 
 	public void run()
 	{
-
-
-
 		while(true)
 		{
-
 
 			try {
 				Socket socketclient = serverSocket.accept();
 
 				socketclient.setSoTimeout(1000); //TODO : Prefs
-				parent.addSocket(socketclient);
+				parent.addSocketToListen(socketclient);
 			} catch (IOException e) {
 				
 				

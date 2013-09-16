@@ -10,7 +10,7 @@ public class test3 {
 
 	
 	public static void main(String[] args) throws IOException {
-		ServerSocket serverSocket=new ServerSocket(3009);//TODO : Pref
+		ServerSocket serverSocket=new ServerSocket(3001);//TODO : Pref
 		Socket socketclient = serverSocket.accept();
 		BufferedReader in = new BufferedReader (new InputStreamReader (socketclient.getInputStream()));
 		System.out.println(in.readLine());

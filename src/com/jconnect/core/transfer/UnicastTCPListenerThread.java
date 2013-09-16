@@ -1,23 +1,23 @@
-package com.jconnect.core.network;
+package com.jconnect.core.transfer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 
 import com.jconnect.core.Gate;
 
-public class UnicastListenerThread  extends AbstractSocketThread {
+public class UnicastTCPListenerThread  extends AbstractSocketThread {
+
+private Socket usingSocket;
 
 
 
-
-
-	public UnicastListenerThread (Gate parent, Socket usingSocket)
+	public UnicastTCPListenerThread (Gate parent, Socket usingSocket)
 	{
-		super(parent,usingSocket);
+		super(parent);
+		this.usingSocket = usingSocket;
 	}
 
 	public void run()
@@ -26,7 +26,7 @@ public class UnicastListenerThread  extends AbstractSocketThread {
 		if(usingSocket==null)
 		{
 			System.out.println("1");
-			parent.handleEndOfListener(usingSocket.getRemoteSocketAddress(), SOCKET_STATUS_UNKNOWN_ERROR);
+			parent.handleEndOfListener(null, SOCKET_STATUS_UNKNOWN_ERROR);
 
 		}
 		else if(usingSocket.isClosed())

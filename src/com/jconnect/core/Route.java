@@ -5,20 +5,24 @@ import java.util.UUID;
 
 public class Route {
 	
+	public enum Protocol
+	{
+		TCP,
+		UDP
+	}
 	private InetSocketAddress socketAddress;
 	private UUID contactUUID;
-	private int ping;
+	private Protocol protocol;
+	private boolean isLocal;
 	
-	public Route(UUID contact, InetSocketAddress socketAddress)
-	{
-		this(contact,socketAddress,-1);
-	}
 	
-	public Route(UUID contact, InetSocketAddress socketAddress,int ping)
+	
+	public Route(UUID contact, InetSocketAddress socketAddress,Protocol protocol, boolean isLocal)
 	{
 		this.socketAddress = socketAddress;
 		this.contactUUID = contact;
-		this.ping = ping;
+		this.protocol = protocol;
+		this.isLocal = isLocal;
 	}
 
 	public InetSocketAddress getSocketAddress() {
@@ -37,12 +41,22 @@ public class Route {
 		this.contactUUID = contactUUID;
 	}
 
-	public int getPing() {
-		return ping;
+
+
+	public Protocol getProtocol() {
+		return protocol;
 	}
 
-	public void setPing(int ping) {
-		this.ping = ping;
+	public void setProtocol(Protocol protocol) {
+		this.protocol = protocol;
+	}
+
+	public boolean isLocal() {
+		return isLocal;
+	}
+
+	public void setLocal(boolean isLocal) {
+		this.isLocal = isLocal;
 	}
 
 }
