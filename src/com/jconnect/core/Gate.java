@@ -24,12 +24,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jconnect.JConnect;
-import com.jconnect.core.Route.Protocol;
 import com.jconnect.core.transfer.MulticastOutputRunnable;
 import com.jconnect.core.transfer.SocketConnectivityInfo;
 import com.jconnect.core.transfer.TCPInputRunnable;
 import com.jconnect.core.transfer.event.TransferEvent;
 import com.jconnect.message.Message;
+import com.jconnect.model.Route.TransportType;
 import com.jconnect.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
 
@@ -95,7 +95,7 @@ public class Gate implements Runnable {
 				multicastGroup = InetAddress.getByName(Constants.MULTICAST_IP);
 				serverMulticastSocket = new MulticastSocket(jConnect.getPrefs()
 						.getMulticastPort());
-				serverMulticastSocket.setTimeToLive(1);
+				//serverMulticastSocket.setTimeToLive(0);
 				serverMulticastSocket.joinGroup(multicastGroup);
 				serverMulticastThread = new ServerMulticastThread(this,
 						serverMulticastSocket);
@@ -308,15 +308,15 @@ public class Gate implements Runnable {
 	public void sendMessage(String message, UUID receiver) {
 		List<UUID> receivers = new ArrayList<UUID>();
 		receivers.add(receiver);
-		sendMessage(message, receivers, Protocol.TCP);
+		sendMessage(message, receivers, TransportType.TCP);
 	}
 
 	public void sendMessage(String message, List<UUID> receivers) {
-		sendMessage(message, receivers, Protocol.TCP);
+		sendMessage(message, receivers, TransportType.TCP);
 	}
 
 	public void sendMessage(String message, List<UUID> receivers,
-			Protocol protocol) {
+			TransportType protocol) {
 
 		if (receivers == null) { // MULTICAST
 			outputGateThreadPool.execute(new MulticastOutputRunnable(this,
