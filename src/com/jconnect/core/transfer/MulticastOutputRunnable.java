@@ -6,7 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import com.jconnect.core.Gate;
-import com.jconnect.core.transfer.event.TransferEvent;
+import com.jconnect.core.event.TransferEvent;
 
 public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 

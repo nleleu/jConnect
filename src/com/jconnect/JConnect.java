@@ -1,7 +1,7 @@
 package com.jconnect;
 
 import com.jconnect.core.Gate;
-import com.jconnect.peergroup.PeerGroupManager;
+import com.jconnect.core.peergroup.PeerGroupManager;
 import com.jconnect.util.PreferencesStore;
 
 public class JConnect {
@@ -15,6 +15,10 @@ public class JConnect {
 		this(null);
 	}
 
+	public PeerGroupManager getPeerGroupManager() {
+		return peerGroupManager;
+	}
+	
 	public JConnect(String prefPath) {
 		prefs = new PreferencesStore(prefPath);
 		gate = new Gate(this);

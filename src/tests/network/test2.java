@@ -1,9 +1,10 @@
 package tests.network;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.jconnect.JConnect;
-import com.jconnect.core.Gate;
-import com.jconnect.core.WindowApp;
+import com.jconnect.util.WindowApp;
 
 
 public class test2 {
@@ -19,6 +20,8 @@ public class test2 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
 		jconnect.getGate().sendMulticastMessage("coucou");
 		Runtime.getRuntime().addShutdownHook(new Thread()
         {
@@ -30,6 +33,17 @@ public class test2 {
             }
         });
 		WindowApp w = new WindowApp();
+		
+		Timer t =new Timer();
+		
+		t.scheduleAtFixedRate(new TimerTask() {
+			
+			@Override
+			public void run() {
+				jconnect.getGate().sendMulticastMessage("coucou"+System.currentTimeMillis());
+				
+			}
+		}, 1000, 2000);
 
 	}
 

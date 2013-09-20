@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -24,13 +23,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jconnect.JConnect;
+import com.jconnect.core.event.MessageEvent;
+import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.message.Message;
+import com.jconnect.core.model.RouteModel.TransportType;
+import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.core.transfer.MulticastOutputRunnable;
 import com.jconnect.core.transfer.SocketConnectivityInfo;
 import com.jconnect.core.transfer.TCPInputRunnable;
-import com.jconnect.core.transfer.event.TransferEvent;
-import com.jconnect.message.Message;
-import com.jconnect.model.Route.TransportType;
-import com.jconnect.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
 
 public class Gate implements Runnable {
@@ -43,7 +43,7 @@ public class Gate implements Runnable {
 	private ServerSocket serverTCPSocket;
 
 	// retour des threads d'envois et receptions
-	private Stack<TransferEvent> eventsList = new Stack<TransferEvent>();
+	// private Stack<TransferEvent> eventsList = new Stack<TransferEvent>();
 
 	private MulticastSocket serverMulticastSocket = null;
 	private DatagramSocket serverUDPSocket = null;
@@ -95,7 +95,7 @@ public class Gate implements Runnable {
 				multicastGroup = InetAddress.getByName(Constants.MULTICAST_IP);
 				serverMulticastSocket = new MulticastSocket(jConnect.getPrefs()
 						.getMulticastPort());
-				//serverMulticastSocket.setTimeToLive(0);
+				// serverMulticastSocket.setTimeToLive(0);
 				serverMulticastSocket.joinGroup(multicastGroup);
 				serverMulticastThread = new ServerMulticastThread(this,
 						serverMulticastSocket);
@@ -230,40 +230,40 @@ public class Gate implements Runnable {
 					}
 				}
 
-				synchronized (eventsList) {
-					while (!eventsList.isEmpty()) {
-						TransferEvent event = eventsList.pop();
-						SocketConnectivityInfo socketInfo = inputSockets
-								.get(event.getSocketAddress());
-						switch (event.getState()) {
-						case MESSAGE_RECEIVED:
-							if(socketInfo!=null){
-								socketInfo.setLastReceivedDataDate(System
-										.currentTimeMillis());
-								
-							}
-							//Message m = new Message(event.getData());
-							System.out.println(event.getData());
-
-							//m.getGroup(); // TODO attente BDD
-							break;
-						case SEND_FAIL:
-							// TODO
-							break;
-						case SEND_SUCCESS:
-							if(socketInfo!=null){
-								socketInfo.setLastSentDataDate(System
-										.currentTimeMillis());
-								
-							}
-							// TODO
-							break;
-						default:
-							break;
-						}
-						;
-					}
-				}
+				// synchronized (eventsList) {
+				// while (!eventsList.isEmpty()) {
+				// TransferEvent event = eventsList.pop();
+				// SocketConnectivityInfo socketInfo = inputSockets
+				// .get(event.getSocketAddress());
+				// switch (event.getState()) {
+				// case MESSAGE_RECEIVED:
+				// if(socketInfo!=null){
+				// socketInfo.setLastReceivedDataDate(System
+				// .currentTimeMillis());
+				// }
+				// jConnect.getPeerGroupManager().message;
+				// //Message m = new Message(event.getData());
+				// System.out.println(event.getData());
+				//
+				// //m.getGroup(); // TODO attente BDD
+				// break;
+				// case SEND_FAIL:
+				// // TODO
+				// break;
+				// case SEND_SUCCESS:
+				// if(socketInfo!=null){
+				// socketInfo.setLastSentDataDate(System
+				// .currentTimeMillis());
+				//
+				// }
+				// // TODO
+				// break;
+				// default:
+				// break;
+				// }
+				// ;
+				// }
+				// }
 
 				timer.schedule(new TimerTask() {
 
@@ -272,14 +272,13 @@ public class Gate implements Runnable {
 						synchronized (Gate.this) {
 							Gate.this.notifyAll();
 						}
-						
 
 					}
 				}, Constants.TIME_GATE_THREAD_REFRESH);
 				synchronized (Gate.this) {
 					wait();
 				}
-				
+
 				timer.cancel();
 				timer = new Timer();
 
@@ -291,10 +290,38 @@ public class Gate implements Runnable {
 
 	}
 
-	public void addEvent(TransferEvent ev) {
-		synchronized (eventsList) {
-			eventsList.add(ev);
+	public void addEvent(TransferEvent event) {
+		SocketConnectivityInfo socketInfo = inputSockets.get(event
+				.getSocketAddress());
+		switch (event.getState()) {
+		case MESSAGE_RECEIVED:
+			if (socketInfo != null) {
+				socketInfo.setLastReceivedDataDate(System.currentTimeMillis());
+			}
+			{
+				MessageEvent mEvent = new MessageEvent(
+						MessageEvent.State.MESSAGE_RECEIVED);
+				mEvent.setMessage(new Message(event.getData()));
+				jConnect.getPeerGroupManager().addMessageEvent(mEvent);
+			}
+			break;
+		case SEND_FAIL:
+			// TODO
+			break;
+		case SEND_SUCCESS:
+			if (socketInfo != null) {
+				socketInfo.setLastSentDataDate(System.currentTimeMillis());
+
+			}
+			{
+				MessageEvent mEvent = new MessageEvent(
+						MessageEvent.State.SEND_SUCCESS);
+				mEvent.setMessage(new Message(event.getData()));
+				jConnect.getPeerGroupManager().addMessageEvent(mEvent);
+			}
+			break;
 		}
+		;
 		synchronized (Gate.this) {
 			notifyAll();
 		}

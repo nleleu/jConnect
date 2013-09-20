@@ -3,8 +3,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 
-import com.jconnect.message.content.PingContentMessage;
-import com.jconnect.security.CryptionUtil;
+import com.jconnect.core.security.CryptionUtil;
+import com.jconnect.impl.message.PingContentMessage;
 
 
 public class test2 {

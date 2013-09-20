@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import com.jconnect.core.Gate;
-import com.jconnect.core.transfer.event.TransferEvent;
+import com.jconnect.core.event.TransferEvent;
 
 public class TCPOutputRunnable  extends AbstractSocketRunnable {
 

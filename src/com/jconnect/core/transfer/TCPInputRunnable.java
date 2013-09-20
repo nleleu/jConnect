@@ -8,8 +8,8 @@ import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
 
 import com.jconnect.core.Gate;
-import com.jconnect.core.transfer.event.TransferEvent;
-import com.jconnect.peergroup.AbstractPeerGroup;
+import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.peergroup.AbstractPeerGroup;
 
 public class TCPInputRunnable extends AbstractSocketRunnable {
 

@@ -6,8 +6,8 @@ import java.net.MulticastSocket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jconnect.core.transfer.event.TransferEvent;
-import com.jconnect.peergroup.AbstractPeerGroup;
+import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
 
 
