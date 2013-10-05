@@ -3,6 +3,10 @@ package com.jconnect.core.message;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+/**
+ * MessageContent's Factory 
+ *
+ */
 public class MessageContentFactory {
 
 	public static AbstractContentMessage createMessageContent(String content) {

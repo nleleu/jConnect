@@ -8,6 +8,9 @@ import java.net.InetAddress;
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
 
+/**
+ * Manages the UDP messages' reception 
+ */
 public class UDPOutputRunnable  extends AbstractSocketRunnable {
 
 

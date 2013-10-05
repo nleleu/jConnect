@@ -1,19 +1,23 @@
 package com.jconnect.core.model;
 
-import java.util.UUID;
+import com.jconnect.util.uuid.PeerID;
 
+/**
+ * Peer's model, used for persistence in SQLite database 
+ *
+ */
 public class PeerModel {
 
-	private UUID peerID;
+	private PeerID peerID;
 	
-	public PeerModel(UUID id) {
+	public PeerModel(PeerID id) {
 		peerID = id;
 	}
 	@Override
 	public boolean equals(Object arg) {
 		return ((PeerModel)arg).getPeerID().equals(peerID);
 	}
-	public UUID getPeerID() {
+	public PeerID getPeerID() {
 		return peerID;
 	}
 

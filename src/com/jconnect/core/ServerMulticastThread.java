@@ -10,7 +10,9 @@ import com.jconnect.core.event.TransferEvent;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
 
-
+/**
+ * Thread server constantly listening on Multicast Socket
+ */
 public class ServerMulticastThread extends Thread {
 
 

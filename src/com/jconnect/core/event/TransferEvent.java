@@ -1,8 +1,10 @@
 package com.jconnect.core.event;
 
 import java.net.SocketAddress;
-
-public class  TransferEvent {
+/**
+ * Contains information about success or failure of a network I/O operation
+ */
+public class TransferEvent {
 
 
 	

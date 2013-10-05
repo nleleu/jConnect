@@ -22,7 +22,7 @@ public class JConnect {
 	public JConnect(String prefPath) {
 		prefs = new PreferencesStore(prefPath);
 		gate = new Gate(this);
-		//peerGroupManager = new PeerGroupManager();
+		peerGroupManager = new PeerGroupManager(this);
 		
 	}
 	

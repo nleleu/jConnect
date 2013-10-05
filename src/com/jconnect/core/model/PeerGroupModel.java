@@ -1,19 +1,22 @@
 package com.jconnect.core.model;
 
-import java.util.UUID;
+import com.jconnect.util.uuid.PeerGroupID;
 
-//Classe plus legere que celle du package peerGroup, voir si on peut pas les lier par un héritage ou les fusionner
+/**
+ * PeerGroup's model, used for persistence in SQLite database 
+ *
+ */
 public class PeerGroupModel {
 
-	private UUID groupID;
+	private PeerGroupID groupID;
 	
 
-	public PeerGroupModel(UUID id) {
+	public PeerGroupModel(PeerGroupID id) {
 		groupID  = id;
 	}
 
 
-	public UUID getGroupID() {
+	public PeerGroupID getGroupID() {
 		return groupID;
 	}
 	

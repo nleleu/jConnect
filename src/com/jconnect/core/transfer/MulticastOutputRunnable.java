@@ -8,6 +8,9 @@ import java.net.InetAddress;
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
 
+/**
+ * Manages the multicast messages' emission 
+ */
 public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 
 

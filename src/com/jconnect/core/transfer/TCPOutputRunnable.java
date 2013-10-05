@@ -7,6 +7,9 @@ import java.net.Socket;
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
 
+/**
+ * Manages the TCP messages' emission 
+ */
 public class TCPOutputRunnable  extends AbstractSocketRunnable {
 
 

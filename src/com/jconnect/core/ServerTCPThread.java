@@ -6,10 +6,12 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jconnect.core.event.TransferEvent;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
 
+/**
+ * Thread server constantly listening on TCP Socket
+ */
 public class ServerTCPThread extends Thread {
 
 	private ServerSocket serverSocket;

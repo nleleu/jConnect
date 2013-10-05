@@ -2,12 +2,16 @@ package com.jconnect.core.message;
 
 import java.security.InvalidKeyException;
 import java.security.Key;
-import java.util.UUID;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jconnect.core.security.CryptionUtil;
+import com.jconnect.util.uuid.PeerGroupID;
 
+/**
+ * Message used for network operations
+ *
+ */
 public class Message {
 
 	private final static String TAG_DATE = "date";
@@ -15,7 +19,7 @@ public class Message {
 	private final static String TAG_DATA = "data";
 
 	private long date;
-	private UUID group;
+	private PeerGroupID group;
 	private AbstractContentMessage content;
 	private String encodedContent;
 
@@ -23,7 +27,7 @@ public class Message {
 		JsonParser parser = new JsonParser();
 		JsonObject json = (JsonObject) parser.parse(msg);
 		date = json.get(TAG_DATE).getAsLong();
-		group = UUID.fromString(json.get(TAG_DATA).getAsString());
+		group = new PeerGroupID(json.get(TAG_DATA).getAsString());
 		encodedContent = json.get(TAG_DATA).getAsString();
 	}
 
@@ -38,14 +42,15 @@ public class Message {
 		JsonObject json = new JsonObject();
 		json.addProperty(TAG_DATE, date);
 		json.addProperty(TAG_GROUP, group.toString());
-		String c = CryptionUtil.encrypt(key, content.toString());
-		// TODO encoder
+		String c = content.toString();
+		if(key!=null)
+			c = CryptionUtil.encrypt(key, content.toString());
 		json.addProperty(TAG_DATA, c);
 		return json.toString();
 
 	}
 
-	public UUID getGroup() {
+	public PeerGroupID getGroup() {
 		return group;
 	}
 

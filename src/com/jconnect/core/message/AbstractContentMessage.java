@@ -2,6 +2,10 @@ package com.jconnect.core.message;
 
 import com.google.gson.JsonObject;
 
+/**
+ * Represents a message's content
+ * Serializable to format JSON
+ */
 public abstract class AbstractContentMessage {
 	
 	public AbstractContentMessage() {

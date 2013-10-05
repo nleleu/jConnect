@@ -1,5 +1,6 @@
 package com.jconnect.core.security;
 
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -62,8 +63,65 @@ public class CryptionUtil {
 			e.printStackTrace();
 		}
 		throw new InvalidKeyException("key may be invalide");
-		
+
 	}
+
+
+	public static String encrypt(String password, String data) throws InvalidKeyException {
+
+		try {
+			byte[] passwordInBytes = password.getBytes("ISO-8859-2");
+
+			Key key = new SecretKeySpec(passwordInBytes, "Blowfish"); 
+			Cipher cipher = Cipher.getInstance("Blowfish");
+			cipher.init(Cipher.ENCRYPT_MODE, key);
+
+			byte[] ciphertext = cipher.doFinal(data.getBytes());
+			return Base64.encodeBytes(ciphertext, Base64.NO_OPTIONS);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		} 
+		throw new InvalidKeyException("key may be invalide");
+
+	}
+
+	public static String decrypt(String password, String data) throws InvalidKeyException {
+		try {
+			byte[] passwordInBytes;
+			passwordInBytes = password.getBytes("ISO-8859-2");
+			Key key = new SecretKeySpec(passwordInBytes, "Blowfish"); 
+			Cipher cipher = Cipher.getInstance("Blowfish");
+			cipher.init(Cipher.DECRYPT_MODE, key);
+			String cleartext = new String(cipher.doFinal(data.getBytes()));
+			return cleartext;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		} 
+		throw new InvalidKeyException("key may be invalide");
+
+
+	}
+
 
 	public static Key generateKey() {
 		Random r = new Random();

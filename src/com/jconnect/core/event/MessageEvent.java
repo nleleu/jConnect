@@ -2,7 +2,10 @@ package com.jconnect.core.event;
 
 import com.jconnect.core.message.Message;
 
-
+/**
+ * Wraps a {@link State} and a {@link Message}
+ *
+ */
 public class MessageEvent {
 
 	public enum State {

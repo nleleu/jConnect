@@ -1,7 +1,10 @@
 package com.jconnect.core.transfer;
 
 import java.net.Socket;
-
+/**
+ * Contains some information about opened sockets
+ *
+ */
 public class SocketConnectivityInfo {
 	
 	private Socket socket;

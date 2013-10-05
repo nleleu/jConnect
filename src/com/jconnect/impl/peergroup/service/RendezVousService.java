@@ -3,6 +3,7 @@ package com.jconnect.impl.peergroup.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.jconnect.core.event.MessageEvent;
 import com.jconnect.core.model.PeerModel;
 import com.jconnect.core.peergroup.peer.PeerEvent;
 import com.jconnect.core.peergroup.peer.PeerListener;
@@ -60,6 +61,18 @@ public class RendezVousService extends Service implements PeerListener{
 			break;
 		}
 		
+	}
+
+	@Override
+	protected void handleMessage(MessageEvent m) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected boolean isInteresting(MessageEvent m) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	

@@ -1,8 +1,13 @@
 package com.jconnect.core.model;
 
 import java.net.InetSocketAddress;
-import java.util.UUID;
 
+import com.jconnect.util.uuid.PeerID;
+
+/**
+ * Route's model
+ * Represents a way of contact to reach a peer
+ */
 public class RouteModel {
 	
 	public enum TransportType
@@ -12,14 +17,14 @@ public class RouteModel {
 		MULTICAST
 	}
 	
-	private UUID contactUUID;
+	private PeerID contactUUID;
 	private TransportType transportType;
 	private InetSocketAddress socketAddress;
 
 	
 	
 	
-	public RouteModel(UUID contact, InetSocketAddress socketAddress,TransportType transportType)
+	public RouteModel(PeerID contact, InetSocketAddress socketAddress,TransportType transportType)
 	{
 		this.socketAddress = socketAddress;
 		this.contactUUID = contact;
@@ -35,11 +40,11 @@ public class RouteModel {
 		this.socketAddress = socketAddress;
 	}
 
-	public UUID getContactUUID() {
+	public PeerID getContactUUID() {
 		return contactUUID;
 	}
 
-	public void setContactUUID(UUID contactUUID) {
+	public void setContactUUID(PeerID contactUUID) {
 		this.contactUUID = contactUUID;
 	}
 

@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -32,7 +31,13 @@ import com.jconnect.core.transfer.MulticastOutputRunnable;
 import com.jconnect.core.transfer.SocketConnectivityInfo;
 import com.jconnect.core.transfer.TCPInputRunnable;
 import com.jconnect.util.Constants;
+import com.jconnect.util.uuid.PeerID;
 
+/**
+ * Manages sockets, to operate Networks I/O 
+ * Owns two threadpools, one for sending, the other for receiving messages
+ * Handles servers' threads
+ */
 public class Gate implements Runnable {
 
 	private Logger log = Logger.getLogger(AbstractPeerGroup.class.getName());
@@ -42,18 +47,14 @@ public class Gate implements Runnable {
 
 	private ServerSocket serverTCPSocket;
 
-	// retour des threads d'envois et receptions
-	// private Stack<TransferEvent> eventsList = new Stack<TransferEvent>();
 
 	private MulticastSocket serverMulticastSocket = null;
 	private DatagramSocket serverUDPSocket = null;
-	// private int portTCP = 3009;
 	private InetAddress multicastGroup;
-	// private int multicastPort = 6789;
 
 	private JConnect jConnect;
 
-	// THREAD
+	// THREADs
 
 	private ExecutorService inputGateThreadPool;
 	private ExecutorService outputGateThreadPool;
@@ -70,6 +71,10 @@ public class Gate implements Runnable {
 		this.jConnect = jConnect;
 	}
 
+	/**
+	 * Starts all threads, creates threadpools
+	 * @throws IOException
+	 */
 	public void start() throws IOException {
 		try {
 			timer = new Timer();
@@ -111,6 +116,9 @@ public class Gate implements Runnable {
 
 	}
 
+	/**
+	 * Closes opened sockets and interrupt all threads 
+	 */
 	public void stop() {
 		if (inputGateThreadPool != null) {
 			inputGateThreadPool.shutdownNow();
@@ -320,6 +328,8 @@ public class Gate implements Runnable {
 				jConnect.getPeerGroupManager().addMessageEvent(mEvent);
 			}
 			break;
+		default:
+			break;
 		}
 		;
 		synchronized (Gate.this) {
@@ -332,17 +342,17 @@ public class Gate implements Runnable {
 		sendMessage(message, null, null);
 	}
 
-	public void sendMessage(String message, UUID receiver) {
-		List<UUID> receivers = new ArrayList<UUID>();
+	public void sendMessage(String message, PeerID receiver) {
+		List<PeerID> receivers = new ArrayList<PeerID>();
 		receivers.add(receiver);
 		sendMessage(message, receivers, TransportType.TCP);
 	}
 
-	public void sendMessage(String message, List<UUID> receivers) {
+	public void sendMessage(String message, List<PeerID> receivers) {
 		sendMessage(message, receivers, TransportType.TCP);
 	}
 
-	public void sendMessage(String message, List<UUID> receivers,
+	public void sendMessage(String message, List<PeerID> receivers,
 			TransportType protocol) {
 
 		if (receivers == null) { // MULTICAST
@@ -369,239 +379,6 @@ public class Gate implements Runnable {
 
 	}
 
-	// private void listenerScheduler() {
-	//
-	// Timer timer = new Timer();
-	//
-	// timer.schedule(new TimerTask() {
-	// public void run() {
-	//
-	// synchronized (getOpenedSocketLock()) {
-	//
-	// for (Entry<SocketAddress, SocketConnectivityInfo> entry :
-	// currentOpenedSocketsToListen
-	// .entrySet()) {
-	// if (!pendingListening.contains(entry.getKey())) {
-	// addPendingListeningSocket(entry.getValue());
-	//
-	// }
-	//
-	// }
-	//
-	// }
-	//
-	// }
-	// }, 0, Constants.TIME_GATE_THREAD_REFRESH); // TODO : Prefs
-	// }
-
-	// public void sendMessage(String test) {
-	// if (portTCP == 3009) {
-	// // getRoute from DB, test si present dans currentOpenedSockets
-	// try {
-	// Socket s = openNewTCPSocket(InetAddress.getLocalHost(), -1);
-	// outputGateThreadPool.execute(new UnicastTCPSenderThread(this,
-	// s, "Envoi TCP"));
-	// outputGateThreadPool.execute(new UnicastTCPSenderThread(this,
-	// s, "Envoi TCP"));
-	// outputGateThreadPool.execute(new MulticastUDPSenderThread(this,
-	// multicastSocket, multicastGroup, multicastPort,
-	// "Envoi multi UDP"));
-	//
-	// } catch (UnknownHostException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-	//
-	// }
-	//
-	// private Socket openNewTCPSocket(InetAddress contact, int contactPort) {
-	// Socket res = null;
-	// try {
-	//
-	// res = new Socket(InetAddress.getLocalHost(), 3004);
-	//
-	// addWriteableSocket(res);
-	// } catch (UnknownHostException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// return res;
-	// }
-	//
-	// public void openOutputGate() {
-	// if (!inputGateOpen) {
-	//
-	// try {
-	// serverSocket = new ServerSocket(3004);// TODO : Pref
-	// new ServerThread(this, serverSocket).start();
-	// inputGateOpen = true;
-	// listenerScheduler();
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	//
-	// }
-	// }
-
-	// // Useless ?
-	// public SocketConnectivityInfo getSocketToListen() {
-	// SocketConnectivityInfo res = null;
-	// long currentMin = Long.MAX_VALUE;
-	// for (Entry<SocketAddress, SocketConnectivityInfo> entry :
-	// currentOpenedSocketsToListen
-	// .entrySet()) {
-	// if (entry.getValue().getLastListeningDate() < currentMin
-	// && !pendingListening.contains(entry.getKey())) {
-	// res = entry.getValue();
-	// currentMin = entry.getValue().getLastListeningDate();
-	// }
-	//
-	// }
-	// return res;
-	// }
-
-	// public void addPendingListeningSocket(SocketConnectivityInfo sci) {
-	// pendingListening.add(sci.getSocket().getRemoteSocketAddress());
-	// // Useless
-	// currentOpenedSocketsToListen.get(
-	// sci.getSocket().getRemoteSocketAddress()).setLastListeningDate(
-	// System.currentTimeMillis());
-	// inputGateThreadPool.execute(new UnicastTCPListenerThread(this, sci
-	// .getSocket()));
-	//
-	// }
-
-	// private void writeableSocketChecker() {
-	//
-	// Timer timer = new Timer();
-	//
-	// timer.schedule(new TimerTask() {
-	// public void run() {
-	// if (!inputGateOpen) // Point observable
-	// {
-	// this.cancel();
-	//
-	// } else {
-	// synchronized (getWriteableSocketLock()) {
-	// Iterator<Map.Entry<SocketAddress, SocketConnectivityInfo>> it =
-	// currentWriteableSockets
-	// .entrySet().iterator();
-	// while (it.hasNext()) {
-	// Map.Entry<SocketAddress, SocketConnectivityInfo> pair = it
-	// .next();
-	//
-	// if (pair.getValue().getLastSendDataDate() < System
-	// .currentTimeMillis() - 10000) {
-	// try {
-	// pair.getValue().getSocket().close();
-	//
-	// it.remove();
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	//
-	// }
-	//
-	// }
-	//
-	// }
-	//
-	// }
-	//
-	// }
-	// }, 0, 10000); // TODO : Prefs
-	// }
-
-	// public void handlerMessage(SocketAddress sa, String data) {
-	// synchronized (getOpenedSocketLock()) {
-	// System.out.println("Message  " + data);
-	// // AbstractMessage message = new AbstractMessage(data);
-	// //
-	// if(message.getProtocol().equals(AbstractMessage.transportProtocol.unicastTCP))
-	// //
-	// currentOpenedSocketsToListen.get(sa).setLastReceivedDataDate(System.currentTimeMillis());
-	// }
-	// }
-
-	// public void handleEndOfListener(SocketAddress sa, int returnCode) {
-	// synchronized (getOpenedSocketLock()) {
-	// pendingListening.remove(sa);
-	//
-	// if (returnCode == AbstractSocketThread.SOCKET_STATUS_CLOSED
-	// || returnCode == AbstractSocketThread.SOCKET_STATUS_UNKNOWN_ERROR) {
-	//
-	// currentOpenedSocketsToListen.remove(sa);
-	// System.out.println("Erreur on socket  " + sa);
-	// }
-	//
-	// if (returnCode == AbstractSocketThread.SOCKET_STATUS_TIMEOUT) {
-	//
-	// if (currentOpenedSocketsToListen.get(sa)
-	// .getLastReceivedDataDate() < System.currentTimeMillis() - 1000
-	// && currentOpenedSocketsToListen.get(sa)
-	// .getLastSendDataDate() < System
-	// .currentTimeMillis() - 1000) {
-	// System.out.println("Marre, on ferme " + sa);
-	// try {
-	// currentOpenedSocketsToListen.get(sa).getSocket()
-	// .close();
-	//
-	// currentOpenedSocketsToListen.remove(sa);
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-	// }
-	// }
-	//
-	// }
-
-	// private void addWriteableSocket(Socket s) {
-	// SocketConnectivityInfo sci = new SocketConnectivityInfo(s);
-	// currentWriteableSockets.put(s.getRemoteSocketAddress(), sci);
-	// log.log(Level.FINER, "Socket w ajouté " + s.getRemoteSocketAddress());
-	//
-	// }
-	//
-	// private void addSocketToListen(Socket s) {
-	// SocketConnectivityInfo sci = new SocketConnectivityInfo(s);
-	// currentOpenedSocketsToListen.put(s.getRemoteSocketAddress(), sci);
-	// addPendingListeningSocket(sci);
-	// log.log(Level.FINER, "Socket r ajouté " + s.getRemoteSocketAddress());
-	//
-	// }
-
-	// public void handleEndOfSender(SocketAddress sa, int returnCode, String
-	// data) {
-	//
-	// synchronized (getWriteableSocketLock()) {
-	// if (returnCode == AbstractSocketThread.SOCKET_STATUS_CLOSED
-	// || returnCode == AbstractSocketThread.SOCKET_STATUS_UNKNOWN_ERROR) {
-	// currentWriteableSockets.remove(sa);
-	// System.out.println("Erreur on socket  " + sa);
-	// }
-	// if (returnCode == AbstractSocketThread.SOCKET_STATUS_OK) {
-	// // TODO : TCP
-	// //
-	// currentWriteableSockets.get(sa).setLastSentDataDate(System.currentTimeMillis());
-	// }
-	// }
-	//
-	// }
-
-	// private Object getOpenedSocketLock() {
-	// return openedSocketLock;
-	// }
-	//
-	// private Object getWriteableSocketLock() {
-	// return writeableSocketLock;
-	// }
+	
 
 }

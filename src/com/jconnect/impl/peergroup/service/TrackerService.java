@@ -1,9 +1,10 @@
 package com.jconnect.impl.peergroup.service;
 
 import com.jconnect.core.event.MessageEvent;
+import com.jconnect.core.peergroup.peer.PeerEvent;
 
 
-public class ConnectivityService extends Service{
+public class TrackerService extends Service{
 	
     
 
@@ -12,6 +13,9 @@ public class ConnectivityService extends Service{
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+
+
 
 	@Override
 	protected void handleMessage(MessageEvent m) {
@@ -24,8 +28,4 @@ public class ConnectivityService extends Service{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-
-
-	
 }

@@ -3,9 +3,7 @@ package com.jconnect.impl.peergroup.service;
 import com.jconnect.core.event.MessageEvent;
 
 
-public class ConnectivityService extends Service{
-	
-    
+public class LocalDiscoveryService extends Service{
 
 	@Override
 	protected int action() {
@@ -25,7 +23,4 @@ public class ConnectivityService extends Service{
 		return false;
 	}
 
-
-
-	
 }

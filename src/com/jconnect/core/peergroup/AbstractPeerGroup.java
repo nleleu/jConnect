@@ -1,16 +1,25 @@
 package com.jconnect.core.peergroup;
 
+
+import java.security.InvalidKeyException;
+import java.security.Key;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jconnect.core.event.MessageEvent;
+import com.jconnect.core.message.Message;
 import com.jconnect.core.peergroup.services.AbstractService;
+import com.jconnect.util.uuid.PeerGroupID;
+import com.jconnect.util.uuid.PeerID;
 
+/**
+ * Abstract class for PeerGroup 
+ * Owns a list of services
+ */
 public abstract class AbstractPeerGroup {
 
 	private Logger log = Logger.getLogger(AbstractPeerGroup.class.getName());
@@ -18,15 +27,25 @@ public abstract class AbstractPeerGroup {
 	private AbstractPeerGroup parentGroup;
 	private List<AbstractService> services;
 	private Thread thread;
+	protected PeerGroupManager peerGroupManager;
+	Key securityKey = null;
 
-	private UUID uUID;
+
+	private PeerGroupID uuid;
 	
 	private Stack<MessageEvent> messageEvents;
 
-	public AbstractPeerGroup(UUID uuid, AbstractPeerGroup pGroup) {
+	public AbstractPeerGroup(PeerGroupID uuid, AbstractPeerGroup pGroup) {
 		parentGroup = pGroup;
-		this.uUID = uuid;
+		this.uuid = uuid;
 		thread = new GroupThread();
+	}
+	
+	public AbstractPeerGroup(Key securityKey, PeerGroupID uuid, AbstractPeerGroup pGroup) {
+		parentGroup = pGroup;
+		this.uuid = uuid;
+		thread = new GroupThread();
+		this.securityKey = securityKey;
 	}
 
 	public void addService(AbstractService service) {
@@ -54,7 +73,7 @@ public abstract class AbstractPeerGroup {
 		case WAITING:
 		case TIMED_WAITING:
 		case RUNNABLE:
-			log.log(Level.WARNING, "Group " + uUID
+			log.log(Level.WARNING, "Group " + uuid
 					+ " already running. Thread state:" + thread.getState());
 			break;
 
@@ -65,7 +84,7 @@ public abstract class AbstractPeerGroup {
 		switch (thread.getState()) {
 		case TERMINATED:
 		case NEW:
-			log.log(Level.WARNING, "Group " + uUID
+			log.log(Level.WARNING, "Group " + uuid
 					+ " not running. Thread state:" + thread.getState());
 
 			break;
@@ -87,7 +106,7 @@ public abstract class AbstractPeerGroup {
 		@Override
 		public void run() {
 
-			log.log(Level.FINER, "Group " + uUID + " started");
+			log.log(Level.FINER, "Group " + uuid + " started");
 
 			try {
 				while (thread.getState() == Thread.State.RUNNABLE) {
@@ -98,18 +117,13 @@ public abstract class AbstractPeerGroup {
 
 			}
 
-			log.log(Level.FINER, "Group " + uUID + " stopped");
+			log.log(Level.FINER, "Group " + uuid + " stopped");
 
 		}
 
 		private void update() throws InterruptedException {
 			//TODO gestions des messageevents
 			
-			
-			for (AbstractService service : services) {
-				service.update();
-			}
-
 			for (AbstractService service : services) {
 				if (service.needsUpdate())
 					service.update();
@@ -143,14 +157,26 @@ public abstract class AbstractPeerGroup {
 
 	}
 
-	public UUID getuUID() {
-		return uUID;
+	public PeerGroupID getuUID() {
+		return uuid;
 	}
-
+	
 	public void addMessageEvent(MessageEvent mEvent) {
 		synchronized (messageEvents) {
 			messageEvents.add(mEvent);
+			
 		}
+	}
+	
+	public void sendMessage(Message m, List<PeerID> receivers) throws InvalidKeyException
+	{
+		peerGroupManager.sendMessage(m.generate(securityKey),receivers);
+	}
+	
+	
+	public void setPeerGroupManager(PeerGroupManager peerGroupManager) {
+		this.peerGroupManager=peerGroupManager;
+		
 	}
 
 }

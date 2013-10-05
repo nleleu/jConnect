@@ -11,6 +11,9 @@ import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 
+/**
+ * Manages the TCP messages' reception 
+ */
 public class TCPInputRunnable extends AbstractSocketRunnable {
 
 	private Socket usingSocket;

@@ -5,15 +5,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jconnect.core.model.PeerModel;
 import com.jconnect.core.model.PeerGroupModel;
+import com.jconnect.core.model.PeerModel;
 import com.jconnect.core.model.RouteModel;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
+import com.jconnect.util.uuid.PeerGroupID;
+import com.jconnect.util.uuid.PeerID;
 
+/**
+ * Extends {@link DbliteConnection}
+ * Contains all methods interacting with SQLite DataBase
+ *
+ */
 public class JConnectDataBase extends DbliteConnection {
 
 	private static final String ROUTE_TABLE = "Route";
@@ -83,7 +89,7 @@ public class JConnectDataBase extends DbliteConnection {
 
 	}
 
-	public ArrayList<RouteModel> getRoutes(UUID contactUUID) {
+	public ArrayList<RouteModel> getRoutes(PeerID contactUUID) {
 
 		ArrayList<RouteModel> res = new ArrayList<RouteModel>();
 		try {
@@ -137,7 +143,7 @@ public class JConnectDataBase extends DbliteConnection {
 	// }
 	// }
 
-	public ArrayList<RouteModel> getPeer(UUID contactUUID) {
+	public ArrayList<RouteModel> getPeer(PeerID contactUUID) {
 
 		ArrayList<RouteModel> res = new ArrayList<RouteModel>();
 		try {
@@ -183,7 +189,7 @@ public class JConnectDataBase extends DbliteConnection {
 
 			while (rs.next()) {
 
-				PeerGroupModel p = new PeerGroupModel(UUID.fromString(rs
+				PeerGroupModel p = new PeerGroupModel(new PeerGroupID(rs
 						.getString(PEERGROUP_PEERGROUPUUID_FIELD)));
 
 				res.add(p);
@@ -197,7 +203,7 @@ public class JConnectDataBase extends DbliteConnection {
 		return res;
 	}
 
-	public void addGroupMember(UUID group, PeerModel p) {
+	public void addGroupMember(PeerGroupID group, PeerModel p) {
 		try {
 			update("insert into " + PEERANDGROUP_TABLE + "("
 					+ PEERS_PEERUUID_FIELD + ", "
@@ -209,7 +215,7 @@ public class JConnectDataBase extends DbliteConnection {
 		}
 	}
 
-	public List<PeerModel> getGroupMembers(UUID groupID) {
+	public List<PeerModel> getGroupMembers(PeerGroupID groupID) {
 		List<PeerModel> res = new ArrayList<PeerModel>();
 		try {
 			ResultSet rs = query("select r." + PEERS_PEERUUID_FIELD + " from "
@@ -219,7 +225,7 @@ public class JConnectDataBase extends DbliteConnection {
 
 			while (rs.next()) {
 
-				PeerModel p = new PeerModel(UUID.fromString(rs
+				PeerModel p = new PeerModel(new PeerID(rs
 						.getString(PEERS_PEERUUID_FIELD)));
 				res.add(p);
 
