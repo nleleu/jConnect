@@ -20,7 +20,6 @@ public abstract class AbstractService {
 
 	protected long nextExecutionTime = 0;
 	protected AbstractPeerGroup group;
-	private Stack<MessageEvent> messageEvents;
 
 	public long getNextExecutionTime() {
 		return nextExecutionTime;
@@ -32,7 +31,6 @@ public abstract class AbstractService {
 	 */
 	public void update() {
 		nextExecutionTime = action()+System.currentTimeMillis();
-		handleMessagesReceived();
 	}
 	/**
 	 * 
@@ -49,22 +47,6 @@ public abstract class AbstractService {
 		this.group = abstractPeerGroup;
 	}
 	
-	/**
-	 * For all messages received, looks if the message must be handled
-	 * In that case, calls {@link #handleMessage(MessageEvent)}
-	 */
-	private void handleMessagesReceived()
-	{
-		synchronized (messageEvents) {
-			for(MessageEvent m : messageEvents)
-			{
-				if(isInteresting(m))
-					handleMessage(m);
-			}
-				
-		}
-		
-	}
 	
 	/**
 	 * SendMessage
@@ -85,26 +67,16 @@ public abstract class AbstractService {
 	 * Must be defined in extended class
 	 * @param m : Message to handle
 	 */
-	protected abstract void handleMessage(MessageEvent m);
+	public abstract void handleMessage(MessageEvent m);
 	
 	/**
 	 * Decides if a {@link MessageEvent} must be handled or not
 	 * @param m : MessageEvent to scan
 	 * @return true if the message must be handled, false otherwise
 	 */
-	protected abstract boolean isInteresting(MessageEvent m);
+	//TODO : renommer
+	public abstract boolean isInteresting(MessageEvent m);
 	
-	/**
-	 * Add a message in {@link #messageEvents}
-	 * @param m : MessageEvent to add
-	 */
-	public void addMessageEvent(MessageEvent m)
-	{
-		synchronized (messageEvents) {
-			messageEvents.add(m);
-		}
-		
-	}
 
 	/**
 	 * Executed by {@link #update()}

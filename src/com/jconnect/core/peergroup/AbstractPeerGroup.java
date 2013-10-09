@@ -122,9 +122,18 @@ public abstract class AbstractPeerGroup {
 		}
 
 		private void update() throws InterruptedException {
-			//TODO gestions des messageevents
 			
 			for (AbstractService service : services) {
+				synchronized (messageEvents) {
+					for(MessageEvent me : messageEvents)
+					{
+						if(service.isInteresting(me))
+							service.handleMessage(me);
+					}
+					
+				}
+				messageEvents.clear();
+				
 				if (service.needsUpdate())
 					service.update();
 				timeToSleep = timeToSleep == 0 ? service.getNextExecutionTime()

@@ -18,13 +18,13 @@ public class TrackerService extends Service{
 
 
 	@Override
-	protected void handleMessage(MessageEvent m) {
+	public void handleMessage(MessageEvent m) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected boolean isInteresting(MessageEvent m) {
+	public boolean isInteresting(MessageEvent m) {
 		// TODO Auto-generated method stub
 		return false;
 	}
