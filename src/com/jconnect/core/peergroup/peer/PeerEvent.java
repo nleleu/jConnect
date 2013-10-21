@@ -1,10 +1,10 @@
 package com.jconnect.core.peergroup.peer;
 
-import com.jconnect.core.model.PeerModel;
+import com.jconnect.util.uuid.PeerID;
 
 public class PeerEvent {
 	
-	private PeerModel peer;
+	private PeerID peerId;
 	private EVENT event;
 	
 	public enum EVENT{
@@ -14,8 +14,8 @@ public class PeerEvent {
 		
 	}
 
-	public PeerEvent(PeerModel peer, EVENT event) {
-		this.peer = peer;
+	public PeerEvent(PeerID peerId, EVENT event) {
+		this.peerId = peerId;
 		this.event  = event;
 		
 	}
@@ -24,8 +24,8 @@ public class PeerEvent {
 		return event;
 	}
 
-	public PeerModel getPeer() {
-		return peer;
+	public PeerID getPeerId() {
+		return peerId;
 	}
 
 }

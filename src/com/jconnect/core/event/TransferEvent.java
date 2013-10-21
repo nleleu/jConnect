@@ -1,6 +1,9 @@
 package com.jconnect.core.event;
 
 import java.net.SocketAddress;
+
+import com.jconnect.core.model.RouteModel;
+import com.jconnect.core.model.RouteModel.TransportType;
 /**
  * Contains information about success or failure of a network I/O operation
  */
@@ -21,12 +24,16 @@ public class TransferEvent {
 	public Exception error;
 	private State state;
 	private String data;
+	private RouteModel route;
+	private int tryCount = -1;
+	private TransportType transportType;
 	
 	
-	public TransferEvent(SocketAddress sa, State state)
+	public TransferEvent(SocketAddress sa, State state, TransportType transportType)
 	{
 		this.state = state;
 		this.setSocketAddress(sa);
+		this.transportType=transportType;
 	}
 
 	public SocketAddress getSocketAddress() {
@@ -48,7 +55,26 @@ public class TransferEvent {
 	public void setData(String data) {
 		this.data = data;
 	}
+
+	public void setRoute(RouteModel route) {
+		this.route = route;
+	}
 	
+	public RouteModel getRoute() {
+		return route;
+	}
+	public void setTryCount(int tryCount) {
+		this.tryCount = tryCount;
+	}
+
+	public int getTryCount() {
+		return tryCount ;
+	}
+	public TransportType getTransportType() {
+		return transportType;
+	}
+
+
 	
 	
 }

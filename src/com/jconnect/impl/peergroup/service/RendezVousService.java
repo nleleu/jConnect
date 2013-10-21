@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jconnect.core.event.MessageEvent;
-import com.jconnect.core.model.PeerModel;
 import com.jconnect.core.peergroup.peer.PeerEvent;
 import com.jconnect.core.peergroup.peer.PeerListener;
+import com.jconnect.util.uuid.PeerID;
 
 public class RendezVousService extends Service implements PeerListener{
 
 	
 	private boolean isRendezVous = false;
-	private List<PeerModel> rendezVousPeer = new ArrayList<PeerModel>();
-	private List<PeerModel> connectedPeer = new ArrayList<PeerModel>();;
+	private List<PeerID> rendezVousPeer = new ArrayList<PeerID>();
+	private List<PeerID> connectedPeer = new ArrayList<PeerID>();;
 	
 	public boolean isRendezVous(){
 		return isRendezVous;		
@@ -48,13 +48,13 @@ public class RendezVousService extends Service implements PeerListener{
 			
 			break;
 		case DISCONNECT:
-			for (PeerModel mPeer : connectedPeer) {
-				if(mPeer.equals(event.getPeer())){
+			for (PeerID mPeer : connectedPeer) {
+				if(mPeer.equals(event.getPeerId())){
 					connectedPeer.remove(mPeer);
 				}
 			}
-			for (PeerModel mPeer : rendezVousPeer) {
-				if(mPeer.equals(event.getPeer())){
+			for (PeerID mPeer : rendezVousPeer) {
+				if(mPeer.equals(event.getPeerId())){
 					connectedPeer.remove(mPeer);
 				}
 			}

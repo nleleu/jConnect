@@ -7,6 +7,7 @@ import java.net.InetAddress;
 
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.model.RouteModel.TransportType;
 
 /**
  * Manages the multicast messages' emission 
@@ -34,7 +35,7 @@ public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 		
 		if(usingSocket.isClosed())
 		{
-			parent.addEvent(new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SOCKET_CLOSED));
+			parent.addEvent(new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SOCKET_CLOSED, TransportType.MULTICAST));
 		}
 
 		else
@@ -44,7 +45,7 @@ public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 				DatagramPacket packet = new DatagramPacket(buf, buf.length,group,port);
 				usingSocket.send(packet);
 				
-				TransferEvent e = new TransferEvent(null, TransferEvent.State.SEND_SUCCESS);
+				TransferEvent e = new TransferEvent(null, TransferEvent.State.SEND_SUCCESS, TransportType.MULTICAST);
 				parent.addEvent(e);
 
 			} catch (IOException e) {

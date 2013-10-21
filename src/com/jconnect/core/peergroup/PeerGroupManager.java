@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.jconnect.JConnect;
 import com.jconnect.core.event.MessageEvent;
-import com.jconnect.core.message.Message;
+import com.jconnect.core.peergroup.peer.PeerEvent;
 import com.jconnect.impl.peergroup.NetPeerGroup;
 import com.jconnect.util.uuid.PeerID;
 
@@ -54,9 +54,20 @@ public class PeerGroupManager {
 		
 	}
 
+	
+	public void addPeerEvent(PeerEvent pEvent) {
+		for (int i = 0; i < peerGroups.size(); i++) {
+			peerGroups.get(i).addPeerEvent(pEvent);
+		}
+		
+	}
+	
+	
 	public void sendMessage(String m,List<PeerID> receivers) {
 		jConnect.getGate().sendMessage(m, receivers);
 		
 	}
+
+	
 
 }

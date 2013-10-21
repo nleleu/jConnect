@@ -10,15 +10,13 @@ public class SocketConnectivityInfo {
 	private Socket socket;
 	private long lastSentDataDate;
 	private long lastReceivedDataDate;
-	private long lastListeningDate;
 
 	
 	public SocketConnectivityInfo(Socket socket)
 	{
 		this.socket = socket;
-		this.lastSentDataDate = 0;
-		this.lastReceivedDataDate = 0;
-		this.lastListeningDate = 0;
+		this.lastSentDataDate = System.currentTimeMillis();
+		this.lastReceivedDataDate = System.currentTimeMillis();
 	}
 	
 	public Socket getSocket() {

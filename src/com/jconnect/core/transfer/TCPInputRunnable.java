@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.logging.Logger;
 
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
-import com.jconnect.core.peergroup.AbstractPeerGroup;
+import com.jconnect.core.model.RouteModel.TransportType;
 
 /**
  * Manages the TCP messages' reception 
@@ -17,7 +16,6 @@ import com.jconnect.core.peergroup.AbstractPeerGroup;
 public class TCPInputRunnable extends AbstractSocketRunnable {
 
 	private Socket usingSocket;
-	private Logger log = Logger.getLogger(AbstractPeerGroup.class.getName());
 
 	public TCPInputRunnable(Gate parent, Socket usingSocket) {
 		super(parent);
@@ -26,7 +24,7 @@ public class TCPInputRunnable extends AbstractSocketRunnable {
 
 	public void run() {
 		if (usingSocket.isClosed()) {
-			parent.addEvent(new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SOCKET_CLOSED));
+			parent.addEvent(new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SOCKET_CLOSED, TransportType.TCP));
 		}
 
 		else {
@@ -38,7 +36,7 @@ public class TCPInputRunnable extends AbstractSocketRunnable {
 
 					read = in.readLine();
 					if (read != null){
-						TransferEvent e = new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.MESSAGE_RECEIVED);
+						TransferEvent e = new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.MESSAGE_RECEIVED, TransportType.TCP);
 						e.setData(read);
 						parent.addEvent(e);
 					}
@@ -47,7 +45,7 @@ public class TCPInputRunnable extends AbstractSocketRunnable {
 				
 
 			} catch (SocketTimeoutException ex) {
-				TransferEvent  e =new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.INPUT_TIME_OUT);
+				TransferEvent  e =new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.INPUT_TIME_OUT, TransportType.TCP);
 				e.error=ex;
 				parent.addEvent(e);
 			} catch (IOException e) {

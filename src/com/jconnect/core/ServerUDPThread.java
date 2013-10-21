@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
 
@@ -44,7 +45,7 @@ public class ServerUDPThread extends Thread {
 				datagramSocket.receive(recv);
 				String data = new String(recv.getData(), recv.getOffset(), recv.getLength());
 				
-				TransferEvent e = new TransferEvent(null, TransferEvent.State.MESSAGE_RECEIVED);
+				TransferEvent e = new TransferEvent(null, TransferEvent.State.MESSAGE_RECEIVED, TransportType.UDP);
 				e.setData(data);
 				parent.addEvent(e);
 				

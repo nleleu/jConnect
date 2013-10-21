@@ -1,8 +1,8 @@
 package com.jconnect.core.peergroup;
 
-
 import java.security.InvalidKeyException;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
@@ -11,14 +11,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jconnect.core.event.MessageEvent;
+import com.jconnect.core.event.OutputMessageListener;
+import com.jconnect.core.event.PeerEventListener;
 import com.jconnect.core.message.Message;
+import com.jconnect.core.peergroup.peer.PeerEvent;
 import com.jconnect.core.peergroup.services.AbstractService;
 import com.jconnect.util.uuid.PeerGroupID;
 import com.jconnect.util.uuid.PeerID;
 
 /**
- * Abstract class for PeerGroup 
- * Owns a list of services
+ * Abstract class for PeerGroup Owns a list of services
  */
 public abstract class AbstractPeerGroup {
 
@@ -30,18 +32,25 @@ public abstract class AbstractPeerGroup {
 	protected PeerGroupManager peerGroupManager;
 	Key securityKey = null;
 
-
-	private PeerGroupID uuid;
+	private List<PeerID> connectedPeers = new ArrayList<PeerID>();
+	private List<PeerEventListener> peerEventListeners = new ArrayList<PeerEventListener>();
+	private  List<OutputMessageListener> outputMessageListeners  = new ArrayList<OutputMessageListener>();
 	
-	private Stack<MessageEvent> messageEvents;
+	private PeerGroupID uuid;
+
+	private Stack<MessageEvent> messageEvents = new Stack<MessageEvent>();
+	private Stack<PeerEvent> peerEvents = new Stack<PeerEvent>();
+
+	
 
 	public AbstractPeerGroup(PeerGroupID uuid, AbstractPeerGroup pGroup) {
 		parentGroup = pGroup;
 		this.uuid = uuid;
 		thread = new GroupThread();
 	}
-	
-	public AbstractPeerGroup(Key securityKey, PeerGroupID uuid, AbstractPeerGroup pGroup) {
+
+	public AbstractPeerGroup(Key securityKey, PeerGroupID uuid,
+			AbstractPeerGroup pGroup) {
 		parentGroup = pGroup;
 		this.uuid = uuid;
 		thread = new GroupThread();
@@ -52,10 +61,10 @@ public abstract class AbstractPeerGroup {
 		service.setPeerGroup(this);
 		services.add(service);
 	}
-	
-	public AbstractService getService(String serviceName){
+
+	public AbstractService getService(String serviceName) {
 		for (AbstractService service : services) {
-			if(service.getClass().getName().equals(serviceName)){
+			if (service.getClass().getName().equals(serviceName)) {
 				return service;
 			}
 		}
@@ -97,7 +106,53 @@ public abstract class AbstractPeerGroup {
 
 		}
 	}
+	
+	public void registerPeerEventListener(PeerEventListener peerEventListener){
+		peerEventListeners.add(peerEventListener);
+	}
+	public void unRegisterPeerEventListener(PeerEventListener peerEventListener){
+		peerEventListeners.remove(peerEventListener);
+	}
 
+	public void registerOutputMessageListener(OutputMessageListener outputMessageListener){
+		outputMessageListeners.add(outputMessageListener);
+	}
+	public void unRegisterOutputMessageListener(OutputMessageListener outputMessageListener){
+		outputMessageListeners.remove(outputMessageListener);
+	}
+	
+
+	public PeerGroupID getuUID() {
+		return uuid;
+	}
+
+	public void addMessageEvent(MessageEvent mEvent) {
+		synchronized (messageEvents) {
+			messageEvents.add(mEvent);
+
+		}
+	}
+
+	public void addPeerEvent(PeerEvent pEvent) {
+		synchronized (peerEvents) {
+			peerEvents.add(pEvent);
+		}
+
+	}
+
+	public void sendMessage(Message m, List<PeerID> receivers)
+			throws InvalidKeyException {
+		for (OutputMessageListener oMessageListener : outputMessageListeners) {
+			oMessageListener.onMessageSend(m,  receivers);
+		}
+		peerGroupManager.sendMessage(m.generate(securityKey), receivers);
+	}
+
+	public void setPeerGroupManager(PeerGroupManager peerGroupManager) {
+		this.peerGroupManager = peerGroupManager;
+
+	}
+	
 	private class GroupThread extends Thread {
 
 		private long timeToSleep = 0;
@@ -122,18 +177,41 @@ public abstract class AbstractPeerGroup {
 		}
 
 		private void update() throws InterruptedException {
-			
+
 			for (AbstractService service : services) {
 				synchronized (messageEvents) {
-					for(MessageEvent me : messageEvents)
-					{
-						if(service.isInteresting(me))
+					for (MessageEvent me : messageEvents) {
+						if (service.isInteresting(me))
 							service.handleMessage(me);
 					}
-					
+					messageEvents.clear();
 				}
-				messageEvents.clear();
-				
+				synchronized (peerEvents) {
+					for (PeerEvent pe : peerEvents) {
+						switch (pe.getEvent()) {
+						case CONNECT:
+						case RECONNECT:
+							if(!connectedPeers.contains(pe.getPeerId())){
+								connectedPeers.add(pe.getPeerId());
+							}
+							for (PeerEventListener peerListener : peerEventListeners) {
+								peerListener.onPeerEvent(pe);
+							}
+
+							break;
+						case DISCONNECT:
+							if (connectedPeers.remove(pe.getPeerId())) {
+								for (PeerEventListener peerListener : peerEventListeners) {
+									peerListener.onPeerEvent(pe);
+								}
+							}
+							break;
+						}
+
+					}
+
+				}
+
 				if (service.needsUpdate())
 					service.update();
 				timeToSleep = timeToSleep == 0 ? service.getNextExecutionTime()
@@ -165,27 +243,6 @@ public abstract class AbstractPeerGroup {
 		}
 
 	}
-
-	public PeerGroupID getuUID() {
-		return uuid;
-	}
 	
-	public void addMessageEvent(MessageEvent mEvent) {
-		synchronized (messageEvents) {
-			messageEvents.add(mEvent);
-			
-		}
-	}
-	
-	public void sendMessage(Message m, List<PeerID> receivers) throws InvalidKeyException
-	{
-		peerGroupManager.sendMessage(m.generate(securityKey),receivers);
-	}
-	
-	
-	public void setPeerGroupManager(PeerGroupManager peerGroupManager) {
-		this.peerGroupManager=peerGroupManager;
-		
-	}
 
 }

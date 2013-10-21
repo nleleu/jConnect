@@ -2,7 +2,6 @@ package com.jconnect.core.peergroup.services;
 
 import java.security.InvalidKeyException;
 import java.util.List;
-import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

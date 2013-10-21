@@ -14,6 +14,7 @@ public class JConnect {
 	public JConnect() {
 		this(null);
 	}
+	
 
 	public PeerGroupManager getPeerGroupManager() {
 		return peerGroupManager;

@@ -20,6 +20,7 @@ public class RouteModel {
 	private PeerID contactUUID;
 	private TransportType transportType;
 	private InetSocketAddress socketAddress;
+	
 
 	
 	
@@ -31,6 +32,7 @@ public class RouteModel {
 		this.transportType = transportType;
 
 	}
+	
 
 	public InetSocketAddress getSocketAddress() {
 		return socketAddress;
