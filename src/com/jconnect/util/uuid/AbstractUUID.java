@@ -19,6 +19,9 @@ public abstract class AbstractUUID {
 	
 	public AbstractUUID(String uuid)
 	{
+		if(uuid.indexOf(":")<0){
+			throw new IllegalArgumentException("Invalid UID pathern");
+		}
 		this.prefix = uuid.substring(0, uuid.indexOf(":"));
 		
 		this.uuid = UUID.fromString(uuid.substring(uuid.indexOf(":")+1));

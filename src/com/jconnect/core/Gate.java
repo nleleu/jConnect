@@ -353,7 +353,7 @@ public class Gate implements Runnable {
 
 	}
 
-	private void addRoute(RouteModel route) {
+	public void addRoute(RouteModel route) {
 		synchronized (peerRoutes) {
 
 			List<RouteModel> routes = peerRoutes.get(route.getContactUUID());
@@ -362,20 +362,20 @@ public class Gate implements Runnable {
 				if (!routes.contains(route)) {
 					routes.add(route);
 					PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
-							PeerEvent.EVENT.RECONNECT);
+							PeerEvent.EVENT.NEW_ROUTE);
 					jConnect.getPeerGroupManager().addPeerEvent(pEvent);
 					log.log(Level.FINER, "Peer " + route.getContactUUID()
-							+ " reconnected");
+							+ " new route");
 				}
 			} else {
 				routes = new ArrayList<RouteModel>();
 				routes.add(route);
 				peerRoutes.put(route.getContactUUID(), routes);
-				PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
-						PeerEvent.EVENT.CONNECT);
-				jConnect.getPeerGroupManager().addPeerEvent(pEvent);
+//				PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
+//						PeerEvent.EVENT.CONNECT);
+//				jConnect.getPeerGroupManager().addPeerEvent(pEvent);
 				log.log(Level.FINER, "Peer " + route.getContactUUID()
-						+ " conntected");
+						+ " connected");
 			}
 
 		}
@@ -430,8 +430,8 @@ public class Gate implements Runnable {
 			// retrieving peer's routes
 			List<RouteModel> routes = new ArrayList<RouteModel>();
 			for (PeerID peerID : receivers) {
-				List<RouteModel> peerRoutesList = peerRoutes.get(peerID);
-				if (peerRoutesList != null && peerRoutesList.size() > 0) {
+				List<RouteModel> peerRoutesList = getPeerRoute(peerID, protocol);
+				if (peerRoutesList.size() > 0) {
 					routes.add(getBestRoute(peerRoutesList));
 				}
 			}
@@ -451,6 +451,23 @@ public class Gate implements Runnable {
 
 	}
 
+	
+	private List<RouteModel> getPeerRoute(PeerID peerID, TransportType protocol) {
+		List<RouteModel>  result = new ArrayList<RouteModel>();
+		List<RouteModel>  routes = peerRoutes.get(peerID);
+		if(routes!=null){
+			for (RouteModel routeModel : routes) {
+				if(routeModel.getTransportType()==protocol){
+					result.add(routeModel);
+				}
+			}
+		}
+		return result;
+	}
+
+	/*
+	 * We need to select local address first
+	 */
 	private RouteModel getBestRoute(List<RouteModel> peerRoutesList) {
 		for (RouteModel routeModel : peerRoutesList) {
 			if (routeModel.getSocketAddress().getAddress().isSiteLocalAddress())

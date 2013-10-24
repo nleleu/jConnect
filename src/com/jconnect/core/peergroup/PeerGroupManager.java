@@ -1,9 +1,11 @@
 package com.jconnect.core.peergroup;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jconnect.JConnect;
 import com.jconnect.core.event.MessageEvent;
+import com.jconnect.core.model.RouteModel;
 import com.jconnect.core.peergroup.peer.PeerEvent;
 import com.jconnect.impl.peergroup.NetPeerGroup;
 import com.jconnect.util.uuid.PeerID;
@@ -15,7 +17,7 @@ import com.jconnect.util.uuid.PeerID;
 public class PeerGroupManager {
 	
 	private AbstractPeerGroup netPeerGroup;
-	private List<AbstractPeerGroup> peerGroups;
+	private List<AbstractPeerGroup> peerGroups = new ArrayList<AbstractPeerGroup>();
 	private JConnect jConnect;
 	
 	public PeerGroupManager(JConnect jConnect) {
@@ -65,7 +67,12 @@ public class PeerGroupManager {
 	
 	public void sendMessage(String m,List<PeerID> receivers) {
 		jConnect.getGate().sendMessage(m, receivers);
-		
+	}
+
+	public void addPeerRoutes(List<RouteModel> routes) {
+		for (RouteModel routeModel : routes) {
+			jConnect.getGate().addRoute(routeModel);
+		}
 	}
 
 	

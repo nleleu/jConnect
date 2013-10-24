@@ -1,26 +1,33 @@
 package com.jconnect.impl.peergroup.service;
 
 import com.jconnect.core.event.MessageEvent;
+import com.jconnect.core.peergroup.AbstractPeerGroup;
 
 
 public class LocalDiscoveryService extends Service{
 
-	@Override
-	protected int action() {
-		// TODO Auto-generated method stub
-		return 0;
+	public LocalDiscoveryService(AbstractPeerGroup group) {
+		super(group);
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public void handleMessage(MessageEvent m) {
+	protected void onHandleMessage(MessageEvent m) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public boolean isInteresting(MessageEvent m) {
+	public boolean messageMatcher(MessageEvent message) {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	protected void onUpdade() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

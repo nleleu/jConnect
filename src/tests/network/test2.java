@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.jconnect.JConnect;
+import com.jconnect.core.message.Message;
 import com.jconnect.util.WindowApp;
 
 
@@ -22,7 +23,7 @@ public class test2 {
 		}
 		
 		
-		jconnect.getGate().sendMulticastMessage("coucou");
+		jconnect.getGate().sendMulticastMessage(new Message("test").toString());
 		Runtime.getRuntime().addShutdownHook(new Thread()
         {
             @Override

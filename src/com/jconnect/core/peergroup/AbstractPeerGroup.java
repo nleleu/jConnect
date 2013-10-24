@@ -14,7 +14,9 @@ import com.jconnect.core.event.MessageEvent;
 import com.jconnect.core.event.OutputMessageListener;
 import com.jconnect.core.event.PeerEventListener;
 import com.jconnect.core.message.Message;
+import com.jconnect.core.model.RouteModel;
 import com.jconnect.core.peergroup.peer.PeerEvent;
+import com.jconnect.core.peergroup.peer.PeerEvent.EVENT;
 import com.jconnect.core.peergroup.services.AbstractService;
 import com.jconnect.util.uuid.PeerGroupID;
 import com.jconnect.util.uuid.PeerID;
@@ -26,8 +28,12 @@ public abstract class AbstractPeerGroup {
 
 	private Logger log = Logger.getLogger(AbstractPeerGroup.class.getName());
 
-	private AbstractPeerGroup parentGroup;
-	private List<AbstractService> services;
+	private List<AbstractService> services = new ArrayList<AbstractService>();
+	private List<AbstractService> blockedServices = new ArrayList<AbstractService>();
+	private List<AbstractService> runningServices = new ArrayList<AbstractService>();
+
+	
+	
 	private Thread thread;
 	protected PeerGroupManager peerGroupManager;
 	Key securityKey = null;
@@ -43,23 +49,36 @@ public abstract class AbstractPeerGroup {
 
 	
 
-	public AbstractPeerGroup(PeerGroupID uuid, AbstractPeerGroup pGroup) {
-		parentGroup = pGroup;
+	public AbstractPeerGroup(PeerGroupID uuid) {
 		this.uuid = uuid;
 		thread = new GroupThread();
 	}
 
-	public AbstractPeerGroup(Key securityKey, PeerGroupID uuid,
-			AbstractPeerGroup pGroup) {
-		parentGroup = pGroup;
+	public AbstractPeerGroup(Key securityKey, PeerGroupID uuid) {
 		this.uuid = uuid;
 		thread = new GroupThread();
 		this.securityKey = securityKey;
 	}
 
+	/**
+	 * Add a new service and start his execution
+	 * @param service to add
+	 */
 	public void addService(AbstractService service) {
-		service.setPeerGroup(this);
+		if(services.contains(service))
+			return;
 		services.add(service);
+		runningServices.add(service);
+	}
+	
+	/**
+	 * remove the service from the peerGroup
+	 * @param service to add
+	 */
+	public void removeService(AbstractService service) {
+		services.remove(service);
+		runningServices.remove(service);
+		blockedServices.remove(service);
 	}
 
 	public AbstractService getService(String serviceName) {
@@ -70,7 +89,7 @@ public abstract class AbstractPeerGroup {
 		}
 		return null;
 	}
-
+	
 	public void start() {
 		switch (thread.getState()) {
 		case TERMINATED:
@@ -121,23 +140,30 @@ public abstract class AbstractPeerGroup {
 		outputMessageListeners.remove(outputMessageListener);
 	}
 	
+	public void addPeerRoutes(List<RouteModel> routes){
+		peerGroupManager.addPeerRoutes(routes);
+	}
 
 	public PeerGroupID getuUID() {
 		return uuid;
 	}
 
 	public void addMessageEvent(MessageEvent mEvent) {
+		if(!connectedPeers.contains(mEvent.getMessage().getPeer())){
+			addPeerEvent(new PeerEvent(mEvent.getMessage().getPeer(), EVENT.CONNECT));
+		}
 		synchronized (messageEvents) {
 			messageEvents.add(mEvent);
 
 		}
+		thread.notifyAll();
 	}
 
 	public void addPeerEvent(PeerEvent pEvent) {
 		synchronized (peerEvents) {
 			peerEvents.add(pEvent);
 		}
-
+		thread.notifyAll();
 	}
 
 	public void sendMessage(Message m, List<PeerID> receivers)
@@ -181,7 +207,7 @@ public abstract class AbstractPeerGroup {
 			for (AbstractService service : services) {
 				synchronized (messageEvents) {
 					for (MessageEvent me : messageEvents) {
-						if (service.isInteresting(me))
+						if (service.messageMatcher(me))
 							service.handleMessage(me);
 					}
 					messageEvents.clear();
@@ -190,7 +216,6 @@ public abstract class AbstractPeerGroup {
 					for (PeerEvent pe : peerEvents) {
 						switch (pe.getEvent()) {
 						case CONNECT:
-						case RECONNECT:
 							if(!connectedPeers.contains(pe.getPeerId())){
 								connectedPeers.add(pe.getPeerId());
 							}
@@ -198,6 +223,14 @@ public abstract class AbstractPeerGroup {
 								peerListener.onPeerEvent(pe);
 							}
 
+							break;
+
+						case NEW_ROUTE:
+							if(!connectedPeers.contains(pe.getPeerId())){
+								for (PeerEventListener peerListener : peerEventListeners) {
+									peerListener.onPeerEvent(pe);
+								}
+							}
 							break;
 						case DISCONNECT:
 							if (connectedPeers.remove(pe.getPeerId())) {
@@ -242,6 +275,17 @@ public abstract class AbstractPeerGroup {
 
 		}
 
+	}
+
+	public void activeService(AbstractService abstractService) {
+		if(blockedServices.remove(abstractService))
+			runningServices.add(abstractService);
+		
+	}
+
+	public void blockService(AbstractService abstractService) {
+		if(runningServices.remove(abstractService))
+			blockedServices.add(abstractService);
 	}
 	
 

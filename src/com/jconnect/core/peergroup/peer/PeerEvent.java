@@ -9,7 +9,7 @@ public class PeerEvent {
 	
 	public enum EVENT{
 		CONNECT,
-		RECONNECT,
+		NEW_ROUTE,
 		DISCONNECT,
 		
 	}

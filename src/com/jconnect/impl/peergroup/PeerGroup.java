@@ -15,14 +15,14 @@ public abstract class PeerGroup extends AbstractPeerGroup {
 
 	
 	
-	public PeerGroup(PeerGroupID uuid, AbstractPeerGroup pGroup) {
-		super(uuid, pGroup);
-		discoveryService = new LocalDiscoveryService();
+	public PeerGroup(PeerGroupID uuid) {
+		super(uuid);
+		discoveryService = new LocalDiscoveryService(this);
 		addService(discoveryService);
-		connectivityService = new ConnectivityService();
-		addService(new ConnectivityService());
-		rendezVousService = new RendezVousService();
-		addService(new RendezVousService());
+		connectivityService = new ConnectivityService(this);
+		addService(connectivityService);
+		rendezVousService = new RendezVousService(this);
+		addService(rendezVousService);
 	}
 	
 	

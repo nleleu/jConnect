@@ -17,19 +17,24 @@ import com.jconnect.util.uuid.PeerID;
 public abstract class AbstractService {
 	private Logger log = Logger.getLogger(AbstractPeerGroup.class.getName());
 
-	protected long nextExecutionTime = 0;
+	private long nextExecutionTime = 0;
 	protected AbstractPeerGroup group;
 
 	public long getNextExecutionTime() {
 		return nextExecutionTime;
 	}
 	
+	public AbstractService(AbstractPeerGroup group) {
+		this.group = group;
+	}
+	
+	
 	/**
 	 * Executed when the service is notified
-	 * Calls {@link #action()} and {@link #handleMessagesReceived()}
+	 * Calls {@link #onUpdade()} and {@link #handleMessagesReceived()}
 	 */
 	public void update() {
-		nextExecutionTime = action()+System.currentTimeMillis();
+		onUpdade();
 	}
 	/**
 	 * 
@@ -41,12 +46,40 @@ public abstract class AbstractService {
 		}
 		return false;
 	}
-
-	public void setPeerGroup(AbstractPeerGroup abstractPeerGroup) {
-		this.group = abstractPeerGroup;
+	
+	public void restart(){
+		nextExecutionTime=0;
+		group.activeService(this);
 	}
 	
 	
+	/**
+	 Blocks this service. It should be noticed that this method is NOT a 
+	 blocking call: when it is invoked, the internal nextExecutionTime is
+	 is set to a negative value so that, as soon as the <code>action()</code>
+	 method returns, the service is put into a blocked service queue so that it will 
+	 not be scheduled anymore.<br> 
+	 The service is moved back in the pool of active service when either 
+	 a message is received or the service is explicitly restarted by means of its 
+	 <code>restart()</code> method.<br> 
+	 */
+	protected void block(){
+		block(-1);
+	}
+	
+	/**
+	 Blocks this service during the set time. It should be noticed that this method is NOT a 
+	 blocking call
+	 * @param timeInMillis
+	 */
+	protected void block(long timeInMillis){
+		if(timeInMillis<0){
+			nextExecutionTime = -1;
+		}
+		nextExecutionTime = System.currentTimeMillis()+timeInMillis;
+	}
+
+		
 	/**
 	 * SendMessage
 	 * @param m : message to send
@@ -62,26 +95,36 @@ public abstract class AbstractService {
 	}
 	
 	/**
-	 * Message handler
+	 * handle message
+	 * @param m : Message to handle
+	 */
+	public void handleMessage(final MessageEvent m){
+		 if(nextExecutionTime<0){
+			 restart();
+		 }
+		 onHandleMessage(m);
+	}
+	
+	/**
+	 * execute on message reception
 	 * Must be defined in extended class
 	 * @param m : Message to handle
 	 */
-	public abstract void handleMessage(MessageEvent m);
+	protected abstract void onHandleMessage(final MessageEvent m);
 	
 	/**
 	 * Decides if a {@link MessageEvent} must be handled or not
-	 * @param m : MessageEvent to scan
+	 * @param message : MessageEvent to scan
 	 * @return true if the message must be handled, false otherwise
 	 */
-	//TODO : renommer
-	public abstract boolean isInteresting(MessageEvent m);
+	public abstract boolean messageMatcher(final MessageEvent message);
 	
 
 	/**
 	 * Executed by {@link #update()}
 	 * @return seconds until next service's update  
 	 */
-	protected abstract int action();
+	protected abstract void onUpdade();
 	
 	
 
