@@ -6,6 +6,7 @@ import java.net.Socket;
 
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel;
 import com.jconnect.core.model.RouteModel.TransportType;
 
@@ -15,16 +16,16 @@ import com.jconnect.core.model.RouteModel.TransportType;
 public class TCPOutputRunnable  extends AbstractSocketRunnable {
 
 
-	private String message=new String();
+	private Message message;
 	private Socket usingSocket;
 	private RouteModel route;
 	private int tryCount;
 
-	public TCPOutputRunnable (Gate parent, RouteModel routeModel,String message){
+	public TCPOutputRunnable (Gate parent, RouteModel routeModel,Message message){
 		this(parent, routeModel, message, 0);
 	}
 	
-	public TCPOutputRunnable (Gate parent, RouteModel routeModel,String message, int tryCount)
+	public TCPOutputRunnable (Gate parent, RouteModel routeModel,Message message, int tryCount)
 	{
 		super(parent);
 		this.route = routeModel;
@@ -38,7 +39,7 @@ public class TCPOutputRunnable  extends AbstractSocketRunnable {
 		if(usingSocket==null || usingSocket.isClosed())
 		{
 			TransferEvent e = new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SOCKET_CLOSED, TransportType.TCP);
-			e.setData(message);
+			e.setMessage(message);
 			e.setRoute(route);
 			e.setTryCount(tryCount);
 			parent.addEvent(e);
@@ -56,11 +57,12 @@ public class TCPOutputRunnable  extends AbstractSocketRunnable {
 				out.println(message);
 				out.flush();
 				TransferEvent e = new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SEND_SUCCESS, TransportType.TCP);
+				e.setMessage(message);
 				parent.addEvent(e);
 			} catch (IOException ex) {
 				TransferEvent e = new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SEND_FAIL, TransportType.TCP);
 				e.error = ex;
-				e.setData(message);
+				e.setMessage(message);
 				e.setRoute(route);
 				e.setTryCount(tryCount);
 				parent.addEvent(e);

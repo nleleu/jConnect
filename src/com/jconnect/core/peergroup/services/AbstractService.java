@@ -1,12 +1,11 @@
 package com.jconnect.core.peergroup.services;
 
-import java.security.InvalidKeyException;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jconnect.core.event.MessageEvent;
 import com.jconnect.core.message.Message;
+import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.util.uuid.PeerID;
 
@@ -81,18 +80,25 @@ public abstract class AbstractService {
 
 		
 	/**
-	 * SendMessage
+	 * sendTCPMessage
 	 * @param m : message to send
 	 * @param receivers : list of receiver's {@link PeerID}
 	 */
-	protected void sendMessage(Message m, List<PeerID> receivers)
+	protected void sendTCPMessage(Message m, List<PeerID> receivers)
 	{
-		try {
-			group.sendMessage(m, receivers);
-		} catch (InvalidKeyException e) {
-			log.log(Level.SEVERE, "InvalidKeyException");
-		}
+		group.sendMessage(m, receivers, TransportType.TCP);
 	}
+	
+	protected void sendMulticastMessage(Message m)
+	{
+		group.sendMessage(m, null, TransportType.MULTICAST);
+	}
+	
+	protected void sendUDPMessage(Message m, List<PeerID> receivers)
+	{
+		group.sendMessage(m, receivers, TransportType.UDP);
+	}
+	
 	
 	/**
 	 * handle message

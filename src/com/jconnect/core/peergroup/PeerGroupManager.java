@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.jconnect.JConnect;
 import com.jconnect.core.event.MessageEvent;
+import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel;
+import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.peer.PeerEvent;
 import com.jconnect.impl.peergroup.NetPeerGroup;
 import com.jconnect.util.uuid.PeerID;
@@ -65,8 +67,8 @@ public class PeerGroupManager {
 	}
 	
 	
-	public void sendMessage(String m,List<PeerID> receivers) {
-		jConnect.getGate().sendMessage(m, receivers);
+	public void sendMessage(Message message,List<PeerID> receivers, TransportType protocol) {
+		jConnect.getGate().sendMessage(message, receivers, protocol);
 	}
 
 	public void addPeerRoutes(List<RouteModel> routes) {

@@ -2,6 +2,7 @@ package com.jconnect.core.event;
 
 import java.net.SocketAddress;
 
+import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel;
 import com.jconnect.core.model.RouteModel.TransportType;
 /**
@@ -23,7 +24,7 @@ public class TransferEvent {
 	
 	public Exception error;
 	private State state;
-	private String data;
+	private Message message;
 	private RouteModel route;
 	private int tryCount = -1;
 	private TransportType transportType;
@@ -48,12 +49,12 @@ public class TransferEvent {
 		return state;
 	}
 
-	public String getData() {
-		return data;
+	public Message getMessage() {
+		return message;
 	}
 	
-	public void setData(String data) {
-		this.data = data;
+	public void setMessage(Message message) {
+		this.message = message;
 	}
 
 	public void setRoute(RouteModel route) {

@@ -2,9 +2,9 @@ package com.jconnect.util.uuid;
 
 import java.util.UUID;
 
-public class PeerID extends AbstractUUID {
+public class MessageID extends AbstractUUID {
 	
-private static final String prefix="peerID";
+private static final String prefix="messageID";
 	
 
 	@Override
@@ -12,18 +12,25 @@ private static final String prefix="peerID";
 		return prefix;
 	}
 
-	public PeerID(UUID uuid)
+	public static MessageID generate(){
+		
+		return new MessageID(AbstractUUID.generateUUID());
+	}
+
+	public MessageID(UUID uuid)
 	{
 		super(uuid);
 	}
 	
 	
-	public PeerID(String uuid)
+	public MessageID(String uuid)
 	{
 		super(uuid);
 		if(!getPrefix().equals(prefix))
 			throw new IllegalArgumentException("Invalid prefix : "+getPrefix()+" instead of "+prefix);
 		
 	}
+
+	
 
 }

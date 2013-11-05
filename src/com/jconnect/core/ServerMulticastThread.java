@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
@@ -45,7 +46,7 @@ public class ServerMulticastThread extends Thread {
 				serverSocket.receive(recv);
 				String data = new String(recv.getData(), recv.getOffset(), recv.getLength());
 				TransferEvent ev = new TransferEvent(null, TransferEvent.State.MESSAGE_RECEIVED, TransportType.MULTICAST);
-				ev.setData(data);
+				ev.setMessage(Message.parse(data));
 				parent.addEvent(ev);
 
 			}

@@ -296,14 +296,13 @@ public class Gate implements Runnable {
 				socketInfo.setLastReceivedDataDate(System.currentTimeMillis());
 			}
 			{
-				Message m = new Message(event.getData());
+				Message m = event.getMessage();
 				RouteModel routeModel = new RouteModel(m.getPeer(),
 						(InetSocketAddress) event.getSocketAddress(),
 						event.getTransportType());
 				addRoute(routeModel);
 				MessageEvent mEvent = new MessageEvent(
-						MessageEvent.State.MESSAGE_RECEIVED);
-				mEvent.setMessage(new Message(event.getData()));
+						MessageEvent.State.MESSAGE_RECEIVED,m);
 				jConnect.getPeerGroupManager().addMessageEvent(mEvent);
 			}
 			break;
@@ -315,7 +314,7 @@ public class Gate implements Runnable {
 						.getTCPSendAttempt()) {
 
 					outputGateThreadPool.execute(new TCPOutputRunnable(this,
-							event.getRoute(), event.getData(), event
+							event.getRoute(), event.getMessage(), event
 									.getTryCount() + 1));
 					log.log(Level.FINER, "attempt " + (event.getTryCount() + 1)
 							+ " on "
@@ -326,7 +325,9 @@ public class Gate implements Runnable {
 				removeRoute(event.getRoute());
 
 			}
-
+			MessageEvent e = new MessageEvent(
+					MessageEvent.State.SEND_FAIL,event.getMessage());
+			jConnect.getPeerGroupManager().addMessageEvent(e);
 			break;
 		case INPUT_TIME_OUT:
 			log.log(Level.WARNING, "Input Time Out");
@@ -338,8 +339,7 @@ public class Gate implements Runnable {
 			}
 			{
 				MessageEvent mEvent = new MessageEvent(
-						MessageEvent.State.SEND_SUCCESS);
-				mEvent.setMessage(new Message(event.getData()));
+						MessageEvent.State.SEND_SUCCESS,event.getMessage());
 				jConnect.getPeerGroupManager().addMessageEvent(mEvent);
 			}
 			break;
@@ -395,17 +395,17 @@ public class Gate implements Runnable {
 		}
 	}
 
-	public void sendMulticastMessage(String message) {
+	public void sendMulticastMessage(Message message) {
 		sendMessage(message, null, null);
 	}
 
-	public void sendMessage(String message, PeerID receiver) {
+	public void sendMessage(Message message, PeerID receiver) {
 		List<PeerID> receivers = new ArrayList<PeerID>();
 		receivers.add(receiver);
 		sendMessage(message, receivers, TransportType.TCP);
 	}
 
-	public void sendMessage(String message, List<PeerID> receivers) {
+	public void sendMessage(Message message, List<PeerID> receivers) {
 		sendMessage(message, receivers, TransportType.TCP);
 	}
 
@@ -419,7 +419,7 @@ public class Gate implements Runnable {
 	 * @param protocol
 	 *            - protocol used to send the message (useless if multicast)
 	 */
-	public void sendMessage(String message, List<PeerID> receivers,
+	public void sendMessage(Message message, List<PeerID> receivers,
 			TransportType protocol) {
 
 		if (receivers == null) { // MULTICAST

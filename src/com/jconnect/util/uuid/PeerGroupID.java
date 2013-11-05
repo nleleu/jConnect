@@ -6,9 +6,14 @@ public class PeerGroupID extends AbstractUUID {
 	
 	private static final String prefix="peerGroupID";
 	
+	@Override
+	public String getPrefix() {
+		return prefix;
+	}
+	
 	public PeerGroupID(UUID uuid)
 	{
-		super(uuid,prefix);
+		super(uuid);
 	}
 	
 	

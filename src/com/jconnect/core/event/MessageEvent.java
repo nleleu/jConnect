@@ -15,18 +15,15 @@ public class MessageEvent {
 	private State state;
 	private Message message;
 
-	public MessageEvent(State state) {
+	public MessageEvent(State state, Message message) {
 		this.state = state;
+		this.message = message;
 	}
 
 	public State getState() {
 		return state;
 	}
 
-	public void setMessage(Message message) {
-		this.message = message;
-	}
-	
 	public Message getMessage() {
 		return message;
 	}

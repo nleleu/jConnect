@@ -3,7 +3,10 @@ package com.jconnect.core.peergroup;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -13,11 +16,15 @@ import java.util.logging.Logger;
 import com.jconnect.core.event.MessageEvent;
 import com.jconnect.core.event.OutputMessageListener;
 import com.jconnect.core.event.PeerEventListener;
+import com.jconnect.core.event.RequestCallBack;
+import com.jconnect.core.event.RequestHandler;
 import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel;
+import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.peer.PeerEvent;
 import com.jconnect.core.peergroup.peer.PeerEvent.EVENT;
 import com.jconnect.core.peergroup.services.AbstractService;
+import com.jconnect.util.uuid.MessageID;
 import com.jconnect.util.uuid.PeerGroupID;
 import com.jconnect.util.uuid.PeerID;
 
@@ -46,6 +53,8 @@ public abstract class AbstractPeerGroup {
 
 	private Stack<MessageEvent> messageEvents = new Stack<MessageEvent>();
 	private Stack<PeerEvent> peerEvents = new Stack<PeerEvent>();
+
+	private Map<MessageID , RequestHandler> requestHandles = new HashMap<MessageID , RequestHandler>();
 
 	
 
@@ -166,12 +175,30 @@ public abstract class AbstractPeerGroup {
 		thread.notifyAll();
 	}
 
-	public void sendMessage(Message m, List<PeerID> receivers)
-			throws InvalidKeyException {
+	public void sendMessage(Message message, List<PeerID> receivers, TransportType protocol) {
 		for (OutputMessageListener oMessageListener : outputMessageListeners) {
-			oMessageListener.onMessageSend(m,  receivers);
+			oMessageListener.onMessageSend(message,  receivers);
 		}
-		peerGroupManager.sendMessage(m.generate(securityKey), receivers);
+		if(securityKey!=null){
+			message.encode(securityKey);
+		}
+		peerGroupManager.sendMessage(message, receivers, protocol);
+	}
+	
+	/**
+	 * 
+	 * Call send message and set a call back to handle future answers
+	 * 
+	 * @param message Message to send
+	 * @param receivers List of UUID receivers
+	 * @param maxAnswer Max number of answer needed
+	 * @param millisTimeOut TimeOut in millisecond
+	 * @param callBack Callback when a answer is receive
+	 */
+	public void request(Message message, List<PeerID> receivers,TransportType protocol, int maxAnswer, double millisTimeOut, RequestCallBack callBack ) throws InvalidKeyException{
+		if(callBack!=null)
+			requestHandles.put(message.getID(), new RequestHandler(maxAnswer, System.currentTimeMillis()+millisTimeOut, callBack));
+		sendMessage(message, receivers, protocol);
 	}
 
 	public void setPeerGroupManager(PeerGroupManager peerGroupManager) {
@@ -206,14 +233,34 @@ public abstract class AbstractPeerGroup {
 
 			for (AbstractService service : services) {
 				synchronized (messageEvents) {
-					for (MessageEvent me : messageEvents) {
+					
+					while(!messageEvents.isEmpty()){
+						MessageEvent me = messageEvents.pop();
+												
+						RequestHandler mHandler = requestHandles.get(me.getMessage().getID());
+						if(mHandler!=null){
+							boolean remove = mHandler.handleMessage(me);
+							if(remove){
+								requestHandles.remove(me.getMessage().getID());
+							}
+						}
 						if (service.messageMatcher(me))
 							service.handleMessage(me);
 					}
-					messageEvents.clear();
 				}
+				
+				
+				for (Entry<MessageID, RequestHandler> r : requestHandles.entrySet()) {
+					if(r.getValue().isOver()){
+						requestHandles.remove(r);
+					}
+					
+				}
+				
+				
 				synchronized (peerEvents) {
-					for (PeerEvent pe : peerEvents) {
+					while(!peerEvents.isEmpty()){
+						PeerEvent pe = peerEvents.pop();
 						switch (pe.getEvent()) {
 						case CONNECT:
 							if(!connectedPeers.contains(pe.getPeerId())){

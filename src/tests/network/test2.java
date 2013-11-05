@@ -23,7 +23,7 @@ public class test2 {
 		}
 		
 		
-		jconnect.getGate().sendMulticastMessage(new Message("test").toString());
+		//jconnect.getGate().sendMulticastMessage(new Message("test").toString());
 		Runtime.getRuntime().addShutdownHook(new Thread()
         {
             @Override
@@ -41,7 +41,7 @@ public class test2 {
 			
 			@Override
 			public void run() {
-				jconnect.getGate().sendMulticastMessage("coucou"+System.currentTimeMillis());
+				//jconnect.getGate().sendMulticastMessage("coucou"+System.currentTimeMillis());
 				
 			}
 		}, 1000, 2000);

@@ -8,6 +8,7 @@ import java.net.SocketTimeoutException;
 
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel.TransportType;
 
 /**
@@ -37,7 +38,7 @@ public class TCPInputRunnable extends AbstractSocketRunnable {
 					read = in.readLine();
 					if (read != null){
 						TransferEvent e = new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.MESSAGE_RECEIVED, TransportType.TCP);
-						e.setData(read);
+						e.setMessage(Message.parse(read));
 						parent.addEvent(e);
 					}
 						

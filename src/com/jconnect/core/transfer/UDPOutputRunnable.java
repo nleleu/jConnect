@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel;
 import com.jconnect.core.model.RouteModel.TransportType;
 
@@ -15,12 +16,12 @@ import com.jconnect.core.model.RouteModel.TransportType;
 public class UDPOutputRunnable  extends AbstractSocketRunnable {
 
 
-	private String message=new String();
+	private Message message;
 	private DatagramSocket usingSocket;
 	private RouteModel route;
 
 
-	public UDPOutputRunnable (Gate parent, DatagramSocket usingSocket, RouteModel routeModel, String message)
+	public UDPOutputRunnable (Gate parent, DatagramSocket usingSocket, RouteModel routeModel, Message message)
 	{
 		super(parent);
 		this.usingSocket =usingSocket;
@@ -32,17 +33,19 @@ public class UDPOutputRunnable  extends AbstractSocketRunnable {
 	{
 		
 			try {
-				byte[] buf = message.getBytes(); 
+				byte[] buf = message.toString().getBytes(); 
 				DatagramPacket packet = new DatagramPacket(buf, buf.length,route.getSocketAddress().getAddress(),route.getSocketAddress().getPort());
 				
 				usingSocket.send(packet);
 
 				TransferEvent ev = new TransferEvent(null, TransferEvent.State.SEND_SUCCESS, TransportType.UDP);
+				ev.setMessage(message);
 				parent.addEvent(ev);
+				
 			} catch (IOException ex) {
 				TransferEvent e = new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SEND_FAIL,TransportType.UDP);
 				e.error = ex;
-				e.setData(message);
+				e.setMessage(message);
 				parent.addEvent(e);
 			}
 

@@ -11,10 +11,13 @@ public abstract class AbstractUUID {
 	private UUID uuid;
 	private String prefix;
 	
-	public AbstractUUID(UUID uuid,String prefix)
+	public abstract String getPrefix();
+	
+	
+	public AbstractUUID(UUID uuid)
 	{
 		this.uuid = uuid;
-		this.prefix=prefix;
+		this.prefix=getPrefix();
 	}
 	
 	public AbstractUUID(String uuid)
@@ -38,9 +41,11 @@ public abstract class AbstractUUID {
 		return other.toString().equals(toString());
 	}
 	
-	public String getPrefix()
-	{
-		return prefix;
+	
+
+	public static UUID generateUUID() {
+		return UUID.randomUUID();
+		
 	}
 	
 

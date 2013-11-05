@@ -7,6 +7,7 @@ import java.net.InetAddress;
 
 import com.jconnect.core.Gate;
 import com.jconnect.core.event.TransferEvent;
+import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel.TransportType;
 
 /**
@@ -15,13 +16,13 @@ import com.jconnect.core.model.RouteModel.TransportType;
 public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 
 
-	private String message=new String();
+	private Message message;
 	private DatagramSocket usingSocket;
 	private InetAddress group;
 	private int port;
 
 
-	public MulticastOutputRunnable (Gate parent, DatagramSocket usingSocket,InetAddress group,int port,String message)
+	public MulticastOutputRunnable (Gate parent, DatagramSocket usingSocket,InetAddress group,int port,Message message)
 	{
 		super(parent);
 		this.usingSocket =usingSocket;
@@ -41,11 +42,12 @@ public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 		else
 		{
 			try {
-				byte[] buf = message.getBytes(); 
+				byte[] buf = message.toString().getBytes(); 
 				DatagramPacket packet = new DatagramPacket(buf, buf.length,group,port);
 				usingSocket.send(packet);
 				
 				TransferEvent e = new TransferEvent(null, TransferEvent.State.SEND_SUCCESS, TransportType.MULTICAST);
+				e.setMessage(message);
 				parent.addEvent(e);
 
 			} catch (IOException e) {
