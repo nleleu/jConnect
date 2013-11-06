@@ -3,6 +3,7 @@ package com.jconnect;
 import com.jconnect.core.Gate;
 import com.jconnect.core.peergroup.PeerGroupManager;
 import com.jconnect.util.PreferencesStore;
+import com.jconnect.util.uuid.PeerID;
 
 public class JConnect {
 
@@ -10,6 +11,7 @@ public class JConnect {
 	private Gate gate;
 
 	private PeerGroupManager peerGroupManager;
+	private final PeerID peerID;
 
 	public JConnect() {
 		this(null);
@@ -22,6 +24,7 @@ public class JConnect {
 	
 	public JConnect(String prefPath) {
 		prefs = new PreferencesStore(prefPath);
+		peerID = prefs.getPeerID();
 		gate = new Gate(this);
 		peerGroupManager = new PeerGroupManager(this);
 		
@@ -33,6 +36,11 @@ public class JConnect {
 	
 	public Gate getGate() {
 		return gate;
+	}
+
+
+	public PeerID getPeerID() {
+		return peerID;
 	}
 
 }

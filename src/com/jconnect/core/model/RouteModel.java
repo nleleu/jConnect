@@ -21,7 +21,9 @@ public class RouteModel {
 	private TransportType transportType;
 	private InetSocketAddress socketAddress;
 	
-
+	public long lastReception = 0;
+	public long lastSend = 0;
+	public int lastPing=-1;
 	
 	
 	
@@ -58,6 +60,16 @@ public class RouteModel {
 
 	public void setTransportType(TransportType protocol) {
 		this.transportType = protocol;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof RouteModel){
+			RouteModel r = (RouteModel)obj;
+			return r.getSocketAddress().equals(socketAddress)&&r.contactUUID.equals(contactUUID)&&r.transportType.equals(transportType);
+			
+		}
+		return false;
 	}
 
 

@@ -30,20 +30,20 @@ public class TransferEvent {
 	private TransportType transportType;
 	
 	
-	public TransferEvent(SocketAddress sa, State state, TransportType transportType)
+	public TransferEvent(State state, TransportType transportType)
 	{
 		this.state = state;
-		this.setSocketAddress(sa);
+		//this.setSocketAddress(sa);
 		this.transportType=transportType;
 	}
 
-	public SocketAddress getSocketAddress() {
-		return socketAddress;
-	}
-
-	public void setSocketAddress(SocketAddress socketAddress) {
-		this.socketAddress = socketAddress;
-	}
+//	public SocketAddress getSocketAddress() {
+//		return socketAddress;
+//	}
+//
+//	public void setSocketAddress(SocketAddress socketAddress) {
+//		this.socketAddress = socketAddress;
+//	}
 
 	public State getState() {
 		return state;

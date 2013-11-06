@@ -43,7 +43,7 @@ public abstract class AbstractUUID {
 	
 	
 
-	public static UUID generateUUID() {
+	protected static UUID generateUUID() {
 		return UUID.randomUUID();
 		
 	}

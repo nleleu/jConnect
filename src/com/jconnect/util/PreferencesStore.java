@@ -6,10 +6,10 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jconnect.util.uuid.PeerGroupID;
+import com.jconnect.util.uuid.PeerID;
 
 public class PreferencesStore {
 
@@ -23,6 +23,7 @@ public class PreferencesStore {
 	private final static String TAG_MULTICAST_PORT = "TAG_MULTICAST_PORT";
 	private final static String TAG_SEND_ATTEMPT = "TAG_SEND_ATTEMPT";
 	private final static String TAG_PEERGROUPS = "TAG_PEERGROUPS";
+	private final static String TAG_PEERID = "TAG_PEERID";
 
 	public PreferencesStore(String prefPath) {
 		if (prefPath == null)
@@ -59,6 +60,23 @@ public class PreferencesStore {
 		return prefs.getInt(TAG_SEND_ATTEMPT, 3);
 	}
 
+	public PeerID getPeerID() {
+		String id = prefs.get(TAG_PEERID, null);
+		PeerID peerId;
+		if (id == null) {
+			peerId = PeerID.generate();
+			prefs.put(TAG_PEERID, peerId.toString());
+			try {
+				prefs.sync();
+			} catch (BackingStoreException e) {
+				e.printStackTrace();
+			}
+		} else {
+			peerId = new PeerID(id);
+		}
+		return peerId;
+	}
+
 	public List<PeerGroupID> getPeerGroups() {
 		List<PeerGroupID> peerGroups = new ArrayList<PeerGroupID>();
 		String pg = prefs.get(TAG_PEERGROUPS, "");
@@ -88,4 +106,5 @@ public class PreferencesStore {
 		}
 
 	}
+
 }

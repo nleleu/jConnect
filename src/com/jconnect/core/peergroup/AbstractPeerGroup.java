@@ -24,7 +24,7 @@ import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.peer.PeerEvent;
 import com.jconnect.core.peergroup.peer.PeerEvent.EVENT;
 import com.jconnect.core.peergroup.services.AbstractService;
-import com.jconnect.util.uuid.MessageID;
+import com.jconnect.util.uuid.ConversationID;
 import com.jconnect.util.uuid.PeerGroupID;
 import com.jconnect.util.uuid.PeerID;
 
@@ -54,7 +54,7 @@ public abstract class AbstractPeerGroup {
 	private Stack<MessageEvent> messageEvents = new Stack<MessageEvent>();
 	private Stack<PeerEvent> peerEvents = new Stack<PeerEvent>();
 
-	private Map<MessageID , RequestHandler> requestHandles = new HashMap<MessageID , RequestHandler>();
+	private Map<ConversationID , RequestHandler> requestHandles = new HashMap<ConversationID , RequestHandler>();
 
 	
 
@@ -250,7 +250,7 @@ public abstract class AbstractPeerGroup {
 				}
 				
 				
-				for (Entry<MessageID, RequestHandler> r : requestHandles.entrySet()) {
+				for (Entry<ConversationID, RequestHandler> r : requestHandles.entrySet()) {
 					if(r.getValue().isOver()){
 						requestHandles.remove(r);
 					}

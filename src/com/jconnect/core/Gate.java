@@ -36,6 +36,7 @@ import com.jconnect.core.transfer.TCPInputRunnable;
 import com.jconnect.core.transfer.TCPOutputRunnable;
 import com.jconnect.core.transfer.UDPOutputRunnable;
 import com.jconnect.util.Constants;
+import com.jconnect.util.uuid.PeerGroupID;
 import com.jconnect.util.uuid.PeerID;
 
 /**
@@ -288,23 +289,46 @@ public class Gate implements Runnable {
 	}
 
 	public void addEvent(TransferEvent event) {
-		SocketConnectivityInfo socketInfo = inputSockets.get(event
-				.getSocketAddress());
+
 		switch (event.getState()) {
-		case MESSAGE_RECEIVED:
+		case MESSAGE_RECEIVED: {
+
+			SocketConnectivityInfo socketInfo = inputSockets.get(event
+					.getRoute().getSocketAddress());
 			if (socketInfo != null) {
 				socketInfo.setLastReceivedDataDate(System.currentTimeMillis());
 			}
 			{
+				event.getRoute().lastReception = System.currentTimeMillis();
+				if (event.getTransportType() == TransportType.UDP) {
+					if (event.getMessage().getGroup().equals(PeerGroupID.NULL)) {// CHECK
+																					// CONNECTIVITY
+																					// MESSAGE
+						if (event.getMessage().getPeer()
+								.equals(jConnect.getPeerID())) {// HAVE TO
+																// RESPOND
+							outputGateThreadPool.execute(new UDPOutputRunnable(
+									this, serverUDPSocket, event.getRoute(),
+									event.getMessage()));
+						} else {
+							event.getRoute().lastSend = event.getMessage()
+									.getDate();
+
+							event.getRoute().lastPing = (int) (event.getRoute().lastReception - event
+									.getRoute().lastSend);
+						}
+					}
+
+				}
+
 				Message m = event.getMessage();
-				RouteModel routeModel = new RouteModel(m.getPeer(),
-						(InetSocketAddress) event.getSocketAddress(),
-						event.getTransportType());
-				addRoute(routeModel);
+
+				addRoute(event.getRoute());
 				MessageEvent mEvent = new MessageEvent(
-						MessageEvent.State.MESSAGE_RECEIVED,m);
+						MessageEvent.State.MESSAGE_RECEIVED, m);
 				jConnect.getPeerGroupManager().addMessageEvent(mEvent);
 			}
+		}
 			break;
 		case SEND_FAIL:
 		case SOCKET_CLOSED:
@@ -325,21 +349,25 @@ public class Gate implements Runnable {
 				removeRoute(event.getRoute());
 
 			}
-			MessageEvent e = new MessageEvent(
-					MessageEvent.State.SEND_FAIL,event.getMessage());
+			MessageEvent e = new MessageEvent(MessageEvent.State.SEND_FAIL,
+					event.getMessage());
 			jConnect.getPeerGroupManager().addMessageEvent(e);
 			break;
 		case INPUT_TIME_OUT:
 			log.log(Level.WARNING, "Input Time Out");
 			break;
 		case SEND_SUCCESS:
-			if (socketInfo != null) {
-				socketInfo.setLastSentDataDate(System.currentTimeMillis());
+			if (event.getTransportType().equals(TransportType.TCP)) {
+				SocketConnectivityInfo socketInfo = inputSockets.get(event
+						.getRoute().getSocketAddress());
+				if (socketInfo != null) {
+					socketInfo.setLastSentDataDate(System.currentTimeMillis());
 
+				}
 			}
 			{
 				MessageEvent mEvent = new MessageEvent(
-						MessageEvent.State.SEND_SUCCESS,event.getMessage());
+						MessageEvent.State.SEND_SUCCESS, event.getMessage());
 				jConnect.getPeerGroupManager().addMessageEvent(mEvent);
 			}
 			break;
@@ -366,14 +394,22 @@ public class Gate implements Runnable {
 					jConnect.getPeerGroupManager().addPeerEvent(pEvent);
 					log.log(Level.FINER, "Peer " + route.getContactUUID()
 							+ " new route");
+				} else {
+					if (route.lastPing > 0) {
+						RouteModel r = routes.get(routes.indexOf(route));
+						r.lastReception = route.lastReception;
+						r.lastPing = route.lastPing;
+						r.lastSend = route.lastSend;
+					}
+
 				}
 			} else {
 				routes = new ArrayList<RouteModel>();
 				routes.add(route);
 				peerRoutes.put(route.getContactUUID(), routes);
-//				PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
-//						PeerEvent.EVENT.CONNECT);
-//				jConnect.getPeerGroupManager().addPeerEvent(pEvent);
+				// PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
+				// PeerEvent.EVENT.CONNECT);
+				// jConnect.getPeerGroupManager().addPeerEvent(pEvent);
 				log.log(Level.FINER, "Peer " + route.getContactUUID()
 						+ " connected");
 			}
@@ -395,18 +431,35 @@ public class Gate implements Runnable {
 		}
 	}
 
-	public void sendMulticastMessage(Message message) {
-		sendMessage(message, null, null);
-	}
+	public void checkPeerUDPConnectivity(final PeerID pId,
+			final long millisRefreshInterval, long responseTimeOut) {
+		List<RouteModel> routes = getPeerRoute(pId, TransportType.UDP);
+		final List<RouteModel> refreshList = new ArrayList<RouteModel>();
+		Message m = Message.getEmptyMessage(pId);
+		for (RouteModel routeModel : routes) {
+			if (routeModel.lastReception + millisRefreshInterval < System
+					.currentTimeMillis()) {
+				outputGateThreadPool.execute(new UDPOutputRunnable(this,
+						serverUDPSocket, routeModel, m));
+				refreshList.add(routeModel);
 
-	public void sendMessage(Message message, PeerID receiver) {
-		List<PeerID> receivers = new ArrayList<PeerID>();
-		receivers.add(receiver);
-		sendMessage(message, receivers, TransportType.TCP);
-	}
+			}
+		}
 
-	public void sendMessage(Message message, List<PeerID> receivers) {
-		sendMessage(message, receivers, TransportType.TCP);
+		timer.schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				for (RouteModel routeModel : refreshList) {
+					if (routeModel.lastReception + millisRefreshInterval < System
+							.currentTimeMillis()) {
+						removeRoute(routeModel);
+					}
+				}
+
+			}
+		}, responseTimeOut);
+
 	}
 
 	/**
@@ -451,13 +504,13 @@ public class Gate implements Runnable {
 
 	}
 
-	
 	private List<RouteModel> getPeerRoute(PeerID peerID, TransportType protocol) {
-		List<RouteModel>  result = new ArrayList<RouteModel>();
-		List<RouteModel>  routes = peerRoutes.get(peerID);
-		if(routes!=null){
+		List<RouteModel> result = new ArrayList<RouteModel>();
+		List<RouteModel> routes = peerRoutes.get(peerID);
+		if (routes != null) {
 			for (RouteModel routeModel : routes) {
-				if(routeModel.getTransportType()==protocol){
+				if (protocol == null
+						|| routeModel.getTransportType() == protocol) {
 					result.add(routeModel);
 				}
 			}

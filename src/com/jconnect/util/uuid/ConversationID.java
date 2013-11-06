@@ -2,7 +2,7 @@ package com.jconnect.util.uuid;
 
 import java.util.UUID;
 
-public class MessageID extends AbstractUUID {
+public class ConversationID extends AbstractUUID {
 	
 private static final String prefix="messageID";
 	
@@ -12,18 +12,18 @@ private static final String prefix="messageID";
 		return prefix;
 	}
 
-	public static MessageID generate(){
+	public static ConversationID generate(){
 		
-		return new MessageID(AbstractUUID.generateUUID());
+		return new ConversationID(AbstractUUID.generateUUID());
 	}
 
-	public MessageID(UUID uuid)
+	public ConversationID(UUID uuid)
 	{
 		super(uuid);
 	}
 	
 	
-	public MessageID(String uuid)
+	public ConversationID(String uuid)
 	{
 		super(uuid);
 		if(!getPrefix().equals(prefix))

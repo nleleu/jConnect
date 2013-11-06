@@ -6,7 +6,7 @@ import java.security.Key;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jconnect.core.security.CryptionUtil;
-import com.jconnect.util.uuid.MessageID;
+import com.jconnect.util.uuid.ConversationID;
 import com.jconnect.util.uuid.PeerGroupID;
 import com.jconnect.util.uuid.PeerID;
 
@@ -28,17 +28,27 @@ public class Message {
 	private AbstractContentMessage content;
 	private String encodedContent;
 	private PeerID peer;
-	private MessageID messageID;
+	private ConversationID conversationID;
 
 	public static Message parse(String msg){
 		return new Message(msg);
 	}
 	
-	private Message(String msg) {
+	public static Message getEmptyMessage(PeerID peerid){
+		return new Message(peerid);
 		
+	}
+	
+	private Message(PeerID peerid) {
+		this.conversationID = ConversationID.generate();
+		group = PeerGroupID.NULL;
+		peer = peerid;
+	}
+	
+	private Message(String msg) {
 		JsonParser parser = new JsonParser();
 		JsonObject json = (JsonObject) parser.parse(msg);
-		messageID = new MessageID(json.get(TAG_ID).getAsString());
+		conversationID = new ConversationID(json.get(TAG_ID).getAsString());
 		date = json.get(TAG_DATE).getAsLong();
 		group = new PeerGroupID(json.get(TAG_GROUP).getAsString());
 		peer = new PeerID(json.get(TAG_PEER_ID).getAsString());
@@ -54,14 +64,14 @@ public class Message {
 		date = System.currentTimeMillis();
 
 		JsonObject json = new JsonObject();
-		json.addProperty(TAG_ID, messageID.toString());
+		json.addProperty(TAG_ID, conversationID.toString());
 		json.addProperty(TAG_DATE, date);
 		json.addProperty(TAG_GROUP, group.toString());
 		json.addProperty(TAG_PEER_ID, peer.toString());
-		String c = content.toString();
+		String c ="";
 		if(encodedContent!=null){
 			c = encodedContent;
-		}else{
+		}else if(content!=null){
 			c = content.toString();
 		}
 		json.addProperty(TAG_DATA, c);
@@ -83,8 +93,12 @@ public class Message {
 		return peer;
 	}
 
-	public MessageID getID() {
-		return messageID;
+	public ConversationID getID() {
+		return conversationID;
+	}
+
+	public long getDate() {
+		return date;
 	}
 
 }

@@ -38,12 +38,12 @@ public class UDPOutputRunnable  extends AbstractSocketRunnable {
 				
 				usingSocket.send(packet);
 
-				TransferEvent ev = new TransferEvent(null, TransferEvent.State.SEND_SUCCESS, TransportType.UDP);
+				TransferEvent ev = new TransferEvent(TransferEvent.State.SEND_SUCCESS, TransportType.UDP);
 				ev.setMessage(message);
 				parent.addEvent(ev);
 				
 			} catch (IOException ex) {
-				TransferEvent e = new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SEND_FAIL,TransportType.UDP);
+				TransferEvent e = new TransferEvent(TransferEvent.State.SEND_FAIL,TransportType.UDP);
 				e.error = ex;
 				e.setMessage(message);
 				parent.addEvent(e);

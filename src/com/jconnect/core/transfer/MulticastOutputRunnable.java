@@ -36,7 +36,7 @@ public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 		
 		if(usingSocket.isClosed())
 		{
-			parent.addEvent(new TransferEvent(usingSocket.getRemoteSocketAddress(),	TransferEvent.State.SOCKET_CLOSED, TransportType.MULTICAST));
+			parent.addEvent(new TransferEvent(TransferEvent.State.SOCKET_CLOSED, TransportType.MULTICAST));
 		}
 
 		else
@@ -46,7 +46,7 @@ public class MulticastOutputRunnable  extends AbstractSocketRunnable {
 				DatagramPacket packet = new DatagramPacket(buf, buf.length,group,port);
 				usingSocket.send(packet);
 				
-				TransferEvent e = new TransferEvent(null, TransferEvent.State.SEND_SUCCESS, TransportType.MULTICAST);
+				TransferEvent e = new TransferEvent(TransferEvent.State.SEND_SUCCESS, TransportType.MULTICAST);
 				e.setMessage(message);
 				parent.addEvent(e);
 

@@ -3,11 +3,13 @@ package com.jconnect.core;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jconnect.core.event.TransferEvent;
 import com.jconnect.core.message.Message;
+import com.jconnect.core.model.RouteModel;
 import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
@@ -44,10 +46,12 @@ public class ServerUDPThread extends Thread {
 				byte[] buf = new byte[Constants.SERVER_BUFFER_SIZE]; 
 				DatagramPacket recv = new DatagramPacket(buf, buf.length);
 				datagramSocket.receive(recv);
+				
 				String data = new String(recv.getData(), recv.getOffset(), recv.getLength());
 				
-				TransferEvent e = new TransferEvent(null, TransferEvent.State.MESSAGE_RECEIVED, TransportType.UDP);
+				TransferEvent e = new TransferEvent(TransferEvent.State.MESSAGE_RECEIVED, TransportType.UDP);
 				e.setMessage(Message.parse(data));
+				e.setRoute(new RouteModel(e.getMessage().getPeer(), new InetSocketAddress(recv.getAddress(),recv.getPort()), TransportType.UDP));
 				parent.addEvent(e);
 				
 			}
