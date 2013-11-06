@@ -27,5 +27,10 @@ public class PeerEvent {
 	public PeerID getPeerId() {
 		return peerId;
 	}
+	
+	@Override
+	public String toString() {
+		return peerId.toString()+ " "+ event;
+	}
 
 }

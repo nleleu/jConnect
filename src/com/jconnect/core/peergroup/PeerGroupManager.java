@@ -18,14 +18,12 @@ import com.jconnect.util.uuid.PeerID;
  */
 public class PeerGroupManager {
 	
-	private AbstractPeerGroup netPeerGroup;
 	private List<AbstractPeerGroup> peerGroups = new ArrayList<AbstractPeerGroup>();
 	private JConnect jConnect;
 	
 	public PeerGroupManager(JConnect jConnect) {
 		this.jConnect = jConnect;
-		netPeerGroup = new NetPeerGroup();
-		addPeerGroup(netPeerGroup);
+		
 		
 	}
 	
@@ -75,6 +73,11 @@ public class PeerGroupManager {
 		for (RouteModel routeModel : routes) {
 			jConnect.getGate().addRoute(routeModel);
 		}
+	}
+
+	public PeerID getPeerID() {
+		return jConnect.getPeerID();
+		
 	}
 
 	

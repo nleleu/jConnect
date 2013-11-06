@@ -1,5 +1,7 @@
 package com.jconnect.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.BackingStoreException;
@@ -8,11 +10,16 @@ import java.util.prefs.Preferences;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.jconnect.JConnect;
 import com.jconnect.util.uuid.PeerGroupID;
 import com.jconnect.util.uuid.PeerID;
 
 public class PreferencesStore {
 
+	
+	private final static String DefaultPath = "jconnect";
+	private final static String DefaultFileName = "conf.ini";
+	
 	private Preferences prefs;
 
 	private final static String TAG_UDP = "TAG_UDP";
@@ -27,8 +34,24 @@ public class PreferencesStore {
 
 	public PreferencesStore(String prefPath) {
 		if (prefPath == null)
-			prefPath = this.getClass().getName();
-		prefs = Preferences.userRoot().node(prefPath);
+			prefPath = DefaultPath;
+		
+		File f = new File(prefPath+File.separator+DefaultFileName);
+		if(!f.exists()){
+			try {
+				f.getParentFile().mkdirs();
+				f.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		System.setProperty("java.util.prefs.PreferencesFactory", FilePreferencesFactory.class.getName());
+		
+		
+	    System.setProperty(FilePreferencesFactory.SYSTEM_PROPERTY_FILE, prefPath+File.separator+DefaultFileName);
+	 
+	    prefs = Preferences.userNodeForPackage(JConnect.class);
+		
 	}
 
 	public boolean isTCP() {
@@ -45,15 +68,15 @@ public class PreferencesStore {
 	}
 
 	public int getTCPPort() {
-		return prefs.getInt(TAG_TCP_PORT, 3009);
+		return prefs.getInt(TAG_TCP_PORT, 3019);
 	}
 
 	public int getUDPPort() {
-		return prefs.getInt(TAG_UDP_PORT, 3009);
+		return prefs.getInt(TAG_UDP_PORT, 3019);
 	}
 
 	public int getMulticastPort() {
-		return prefs.getInt(TAG_MULTICAST_PORT, 3010);
+		return prefs.getInt(TAG_MULTICAST_PORT, 3011);
 	}
 
 	public int getTCPSendAttempt() {

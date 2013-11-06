@@ -5,6 +5,7 @@ import java.security.Key;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.core.security.CryptionUtil;
 import com.jconnect.util.uuid.ConversationID;
 import com.jconnect.util.uuid.PeerGroupID;
@@ -36,6 +37,19 @@ public class Message {
 	
 	public static Message getEmptyMessage(PeerID peerid){
 		return new Message(peerid);
+		
+	}
+	
+	public Message(AbstractPeerGroup group, AbstractContentMessage content){
+		this(group, content, ConversationID.generate());
+		
+	}
+	
+	public Message(AbstractPeerGroup group, AbstractContentMessage content, ConversationID cID){
+		this.conversationID =cID;
+		this.group = group.getuUID();
+		this.peer = group.getPeerID();
+		this.content = content;
 		
 	}
 	
@@ -99,6 +113,10 @@ public class Message {
 
 	public long getDate() {
 		return date;
+	}
+	
+	public AbstractContentMessage getContent() {
+		return content;
 	}
 
 }

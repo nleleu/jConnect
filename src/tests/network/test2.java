@@ -5,6 +5,7 @@ import java.util.TimerTask;
 
 import com.jconnect.JConnect;
 import com.jconnect.core.message.Message;
+import com.jconnect.impl.peergroup.NetPeerGroup;
 import com.jconnect.util.WindowApp;
 
 
@@ -22,6 +23,9 @@ public class test2 {
 			e.printStackTrace();
 		}
 		
+		NetPeerGroup netPeerGroup = new NetPeerGroup();
+		jconnect.getPeerGroupManager().addPeerGroup(netPeerGroup);
+		jconnect.getPeerGroupManager().start();
 		
 		//jconnect.getGate().sendMulticastMessage(new Message("test").toString());
 		Runtime.getRuntime().addShutdownHook(new Thread()
@@ -35,16 +39,16 @@ public class test2 {
         });
 		WindowApp w = new WindowApp();
 		
-		Timer t =new Timer();
-		
-		t.scheduleAtFixedRate(new TimerTask() {
-			
-			@Override
-			public void run() {
-				//jconnect.getGate().sendMulticastMessage("coucou"+System.currentTimeMillis());
-				
-			}
-		}, 1000, 2000);
+//		Timer t =new Timer();
+//		
+//		t.scheduleAtFixedRate(new TimerTask() {
+//			
+//			@Override
+//			public void run() {
+//				//jconnect.getGate().sendMulticastMessage("coucou"+System.currentTimeMillis());
+//				
+//			}
+//		}, 1000, 2000);
 
 	}
 

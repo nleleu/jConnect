@@ -1,5 +1,6 @@
 package com.jconnect.core.peergroup.services;
 
+import java.sql.Blob;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -53,8 +54,8 @@ public abstract class AbstractService {
 	
 	
 	/**
-	 Blocks this service. It should be noticed that this method is NOT a 
-	 blocking call: when it is invoked, the internal nextExecutionTime is
+	 Blocks this service. It should be noticed that this method is <b>NOT a 
+	 blocking call</b>: when it is invoked, the internal nextExecutionTime is
 	 is set to a negative value so that, as soon as the <code>action()</code>
 	 method returns, the service is put into a blocked service queue so that it will 
 	 not be scheduled anymore.<br> 
@@ -69,7 +70,8 @@ public abstract class AbstractService {
 	/**
 	 Blocks this service during the set time. It should be noticed that this method is NOT a 
 	 blocking call
-	 * @param timeInMillis
+	 * @param timeInMillis if negative, similar to a "block()" call
+	 * @see #block()
 	 */
 	protected void block(long timeInMillis){
 		if(timeInMillis<0){

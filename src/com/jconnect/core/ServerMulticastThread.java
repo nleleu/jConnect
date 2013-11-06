@@ -49,7 +49,6 @@ public class ServerMulticastThread extends Thread {
 				String data = new String(recv.getData(), recv.getOffset(), recv.getLength());
 				TransferEvent ev = new TransferEvent(TransferEvent.State.MESSAGE_RECEIVED, TransportType.MULTICAST);
 				ev.setMessage(Message.parse(data));
-				//TODO tester la route recu en multicast
 				ev.setRoute(new RouteModel(ev.getMessage().getPeer(), new InetSocketAddress(recv.getAddress(),recv.getPort()), TransportType.MULTICAST));
 
 				parent.addEvent(ev);
@@ -59,7 +58,7 @@ public class ServerMulticastThread extends Thread {
 
 
 		} catch (IOException e) {
-			log.log(Level.FINER, "Server TCP thread close :"+e.getMessage()); 
+			log.log(Level.FINER, "Server MULTICAST thread close :"+e.getMessage()); 
 		}
 
 

@@ -39,24 +39,20 @@ public abstract class AbstractPeerGroup {
 	private List<AbstractService> blockedServices = new ArrayList<AbstractService>();
 	private List<AbstractService> runningServices = new ArrayList<AbstractService>();
 
-	
-	
 	private Thread thread;
 	protected PeerGroupManager peerGroupManager;
 	Key securityKey = null;
 
 	private List<PeerID> connectedPeers = new ArrayList<PeerID>();
 	private List<PeerEventListener> peerEventListeners = new ArrayList<PeerEventListener>();
-	private  List<OutputMessageListener> outputMessageListeners  = new ArrayList<OutputMessageListener>();
-	
+	private List<OutputMessageListener> outputMessageListeners = new ArrayList<OutputMessageListener>();
+
 	private PeerGroupID uuid;
 
 	private Stack<MessageEvent> messageEvents = new Stack<MessageEvent>();
 	private Stack<PeerEvent> peerEvents = new Stack<PeerEvent>();
 
-	private Map<ConversationID , RequestHandler> requestHandles = new HashMap<ConversationID , RequestHandler>();
-
-	
+	private Map<ConversationID, RequestHandler> requestHandles = new HashMap<ConversationID, RequestHandler>();
 
 	public AbstractPeerGroup(PeerGroupID uuid) {
 		this.uuid = uuid;
@@ -71,18 +67,22 @@ public abstract class AbstractPeerGroup {
 
 	/**
 	 * Add a new service and start his execution
-	 * @param service to add
+	 * 
+	 * @param service
+	 *            to add
 	 */
 	public void addService(AbstractService service) {
-		if(services.contains(service))
+		if (services.contains(service))
 			return;
 		services.add(service);
 		runningServices.add(service);
 	}
-	
+
 	/**
 	 * remove the service from the peerGroup
-	 * @param service to add
+	 * 
+	 * @param service
+	 *            to add
 	 */
 	public void removeService(AbstractService service) {
 		services.remove(service);
@@ -98,7 +98,7 @@ public abstract class AbstractPeerGroup {
 		}
 		return null;
 	}
-	
+
 	public void start() {
 		switch (thread.getState()) {
 		case TERMINATED:
@@ -134,22 +134,26 @@ public abstract class AbstractPeerGroup {
 
 		}
 	}
-	
-	public void registerPeerEventListener(PeerEventListener peerEventListener){
+
+	public void registerPeerEventListener(PeerEventListener peerEventListener) {
 		peerEventListeners.add(peerEventListener);
 	}
-	public void unRegisterPeerEventListener(PeerEventListener peerEventListener){
+
+	public void unRegisterPeerEventListener(PeerEventListener peerEventListener) {
 		peerEventListeners.remove(peerEventListener);
 	}
 
-	public void registerOutputMessageListener(OutputMessageListener outputMessageListener){
+	public void registerOutputMessageListener(
+			OutputMessageListener outputMessageListener) {
 		outputMessageListeners.add(outputMessageListener);
 	}
-	public void unRegisterOutputMessageListener(OutputMessageListener outputMessageListener){
+
+	public void unRegisterOutputMessageListener(
+			OutputMessageListener outputMessageListener) {
 		outputMessageListeners.remove(outputMessageListener);
 	}
-	
-	public void addPeerRoutes(List<RouteModel> routes){
+
+	public void addPeerRoutes(List<RouteModel> routes) {
 		peerGroupManager.addPeerRoutes(routes);
 	}
 
@@ -158,54 +162,77 @@ public abstract class AbstractPeerGroup {
 	}
 
 	public void addMessageEvent(MessageEvent mEvent) {
-		if(!connectedPeers.contains(mEvent.getMessage().getPeer())){
-			addPeerEvent(new PeerEvent(mEvent.getMessage().getPeer(), EVENT.CONNECT));
+		if(mEvent.getState()==MessageEvent.State.MESSAGE_RECEIVED){
+			if (!connectedPeers.contains(mEvent.getMessage().getPeer())) {
+				addPeerEvent(new PeerEvent(mEvent.getMessage().getPeer(),
+						EVENT.CONNECT));
+			}
 		}
 		synchronized (messageEvents) {
 			messageEvents.add(mEvent);
 
 		}
-		thread.notifyAll();
+		synchronized(thread){
+			thread.notifyAll();	
+		}
+		
 	}
 
 	public void addPeerEvent(PeerEvent pEvent) {
 		synchronized (peerEvents) {
 			peerEvents.add(pEvent);
 		}
-		thread.notifyAll();
+		synchronized(thread){
+			thread.notifyAll();	
+		}
+		
 	}
 
-	public void sendMessage(Message message, List<PeerID> receivers, TransportType protocol) {
+	public void sendMessage(Message message, List<PeerID> receivers,
+			TransportType protocol) {
 		for (OutputMessageListener oMessageListener : outputMessageListeners) {
-			oMessageListener.onMessageSend(message,  receivers);
+			if (oMessageListener.messageMatcher(message))
+				oMessageListener.onMessageSend(message, receivers);
 		}
-		if(securityKey!=null){
+		if (securityKey != null) {
 			message.encode(securityKey);
 		}
 		peerGroupManager.sendMessage(message, receivers, protocol);
 	}
-	
+
 	/**
 	 * 
 	 * Call send message and set a call back to handle future answers
 	 * 
-	 * @param message Message to send
-	 * @param receivers List of UUID receivers
-	 * @param maxAnswer Max number of answer needed
-	 * @param millisTimeOut TimeOut in millisecond
-	 * @param callBack Callback when a answer is receive
+	 * @param message
+	 *            Message to send
+	 * @param receivers
+	 *            List of UUID receivers
+	 * @param maxAnswer
+	 *            Max number of answer needed
+	 * @param millisTimeOut
+	 *            TimeOut in millisecond
+	 * @param callBack
+	 *            Callback when a answer is receive
 	 */
-	public void request(Message message, List<PeerID> receivers,TransportType protocol, int maxAnswer, double millisTimeOut, RequestCallBack callBack ) throws InvalidKeyException{
-		if(callBack!=null)
-			requestHandles.put(message.getID(), new RequestHandler(maxAnswer, System.currentTimeMillis()+millisTimeOut, callBack));
+	public void request(Message message, List<PeerID> receivers,
+			TransportType protocol, int maxAnswer, double millisTimeOut,
+			RequestCallBack callBack) throws InvalidKeyException {
+		if (callBack != null)
+			requestHandles.put(message.getID(), new RequestHandler(maxAnswer,
+					System.currentTimeMillis() + millisTimeOut, callBack));
 		sendMessage(message, receivers, protocol);
 	}
 
+	/**
+	 * Should never be called. Used by library core
+	 * 
+	 * @param peerGroupManager
+	 */
 	public void setPeerGroupManager(PeerGroupManager peerGroupManager) {
 		this.peerGroupManager = peerGroupManager;
-
 	}
-	
+
 	private class GroupThread extends Thread {
 
 		private long timeToSleep = 0;
@@ -233,14 +260,15 @@ public abstract class AbstractPeerGroup {
 
 			for (AbstractService service : services) {
 				synchronized (messageEvents) {
-					
-					while(!messageEvents.isEmpty()){
+
+					while (!messageEvents.isEmpty()) {
 						MessageEvent me = messageEvents.pop();
-												
-						RequestHandler mHandler = requestHandles.get(me.getMessage().getID());
-						if(mHandler!=null){
+
+						RequestHandler mHandler = requestHandles.get(me
+								.getMessage().getID());
+						if (mHandler != null) {
 							boolean remove = mHandler.handleMessage(me);
-							if(remove){
+							if (remove) {
 								requestHandles.remove(me.getMessage().getID());
 							}
 						}
@@ -248,22 +276,21 @@ public abstract class AbstractPeerGroup {
 							service.handleMessage(me);
 					}
 				}
-				
-				
-				for (Entry<ConversationID, RequestHandler> r : requestHandles.entrySet()) {
-					if(r.getValue().isOver()){
+
+				for (Entry<ConversationID, RequestHandler> r : requestHandles
+						.entrySet()) {
+					if (r.getValue().isOver()) {
 						requestHandles.remove(r);
 					}
-					
+
 				}
-				
-				
+
 				synchronized (peerEvents) {
-					while(!peerEvents.isEmpty()){
+					while (!peerEvents.isEmpty()) {
 						PeerEvent pe = peerEvents.pop();
 						switch (pe.getEvent()) {
 						case CONNECT:
-							if(!connectedPeers.contains(pe.getPeerId())){
+							if (!connectedPeers.contains(pe.getPeerId())) {
 								connectedPeers.add(pe.getPeerId());
 							}
 							for (PeerEventListener peerListener : peerEventListeners) {
@@ -273,7 +300,7 @@ public abstract class AbstractPeerGroup {
 							break;
 
 						case NEW_ROUTE:
-							if(!connectedPeers.contains(pe.getPeerId())){
+							if (!connectedPeers.contains(pe.getPeerId())) {
 								for (PeerEventListener peerListener : peerEventListeners) {
 									peerListener.onPeerEvent(pe);
 								}
@@ -325,15 +352,18 @@ public abstract class AbstractPeerGroup {
 	}
 
 	public void activeService(AbstractService abstractService) {
-		if(blockedServices.remove(abstractService))
+		if (blockedServices.remove(abstractService))
 			runningServices.add(abstractService);
-		
+
 	}
 
 	public void blockService(AbstractService abstractService) {
-		if(runningServices.remove(abstractService))
+		if (runningServices.remove(abstractService))
 			blockedServices.add(abstractService);
 	}
-	
+
+	public PeerID getPeerID() {
+		return peerGroupManager.getPeerID();
+	}
 
 }

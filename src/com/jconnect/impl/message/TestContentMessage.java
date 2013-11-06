@@ -3,17 +3,16 @@ package com.jconnect.impl.message;
 import com.google.gson.JsonObject;
 import com.jconnect.core.message.AbstractContentMessage;
 
-public class PingContentMessage extends AbstractContentMessage{
+public class TestContentMessage extends AbstractContentMessage{
 
-	private static final String TAG_DATE_PING = "date_ping";
-	private long datePing = 0;
+	private static final String TAG_DATE_PING = "test";
+	private String testValue = "testv";
 	
 
 	
 	@Override
 	protected JsonObject exportFields(JsonObject json) {
-		if(datePing!=0)
-			json.addProperty(TAG_DATE_PING, datePing);
+		json.addProperty(TAG_DATE_PING, testValue);
 		return json;
 	}
 
@@ -22,7 +21,7 @@ public class PingContentMessage extends AbstractContentMessage{
 	@Override
 	protected void importFields(JsonObject json) {
 		if(json.has(TAG_DATE_PING))
-			datePing =json.get(TAG_DATE_PING).getAsLong();
+			testValue =json.get(TAG_DATE_PING).getAsString();
 			
 	}
 

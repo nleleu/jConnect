@@ -319,6 +319,17 @@ public class Gate implements Runnable {
 						}
 					}
 
+				} else if (event.getTransportType() == TransportType.MULTICAST) { // Catch
+																					// our
+																					// sended
+																					// message
+					if (event.getMessage().getPeer()
+							.equals(jConnect.getPeerID())) {
+						// ignore message
+						return;
+
+					}
+
 				}
 
 				Message m = event.getMessage();
@@ -382,6 +393,8 @@ public class Gate implements Runnable {
 	}
 
 	public void addRoute(RouteModel route) {
+		if (route.getTransportType().equals(TransportType.MULTICAST))
+			return;
 		synchronized (peerRoutes) {
 
 			List<RouteModel> routes = peerRoutes.get(route.getContactUUID());

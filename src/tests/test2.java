@@ -4,7 +4,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 
 import com.jconnect.core.security.CryptionUtil;
-import com.jconnect.impl.message.PingContentMessage;
+import com.jconnect.impl.message.TestContentMessage;
 
 
 public class test2 {
