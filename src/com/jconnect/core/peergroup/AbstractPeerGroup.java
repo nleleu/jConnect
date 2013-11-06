@@ -162,7 +162,7 @@ public abstract class AbstractPeerGroup {
 	}
 
 	public void addMessageEvent(MessageEvent mEvent) {
-		if(mEvent.getState()==MessageEvent.State.MESSAGE_RECEIVED){
+		if (mEvent.getState() == MessageEvent.State.MESSAGE_RECEIVED) {
 			if (!connectedPeers.contains(mEvent.getMessage().getPeer())) {
 				addPeerEvent(new PeerEvent(mEvent.getMessage().getPeer(),
 						EVENT.CONNECT));
@@ -172,20 +172,20 @@ public abstract class AbstractPeerGroup {
 			messageEvents.add(mEvent);
 
 		}
-		synchronized(thread){
-			thread.notifyAll();	
+		synchronized (thread) {
+			thread.notifyAll();
 		}
-		
+
 	}
 
 	public void addPeerEvent(PeerEvent pEvent) {
 		synchronized (peerEvents) {
 			peerEvents.add(pEvent);
 		}
-		synchronized(thread){
-			thread.notifyAll();	
+		synchronized (thread) {
+			thread.notifyAll();
 		}
-		
+
 	}
 
 	public void sendMessage(Message message, List<PeerID> receivers,
@@ -258,67 +258,70 @@ public abstract class AbstractPeerGroup {
 
 		private void update() throws InterruptedException {
 
-			for (AbstractService service : services) {
-				synchronized (messageEvents) {
+			synchronized (messageEvents) {
 
-					while (!messageEvents.isEmpty()) {
-						MessageEvent me = messageEvents.pop();
+				while (!messageEvents.isEmpty()) {
+					MessageEvent me = messageEvents.pop();
 
-						RequestHandler mHandler = requestHandles.get(me
-								.getMessage().getID());
-						if (mHandler != null) {
-							boolean remove = mHandler.handleMessage(me);
-							if (remove) {
-								requestHandles.remove(me.getMessage().getID());
-							}
+					RequestHandler mHandler = requestHandles.get(me
+							.getMessage().getID());
+					if (mHandler != null) {
+						boolean remove = mHandler.handleMessage(me);
+						if (remove) {
+							requestHandles.remove(me.getMessage().getID());
 						}
+					}
+					for (AbstractService service : services) {
 						if (service.messageMatcher(me))
 							service.handleMessage(me);
 					}
 				}
+			}
 
-				for (Entry<ConversationID, RequestHandler> r : requestHandles
-						.entrySet()) {
-					if (r.getValue().isOver()) {
-						requestHandles.remove(r);
-					}
-
+			for (Entry<ConversationID, RequestHandler> r : requestHandles
+					.entrySet()) {
+				if (r.getValue().isOver()) {
+					requestHandles.remove(r);
 				}
 
-				synchronized (peerEvents) {
-					while (!peerEvents.isEmpty()) {
-						PeerEvent pe = peerEvents.pop();
-						switch (pe.getEvent()) {
-						case CONNECT:
-							if (!connectedPeers.contains(pe.getPeerId())) {
-								connectedPeers.add(pe.getPeerId());
-							}
+			}
+
+			synchronized (peerEvents) {
+				while (!peerEvents.isEmpty()) {
+					PeerEvent pe = peerEvents.pop();
+					switch (pe.getEvent()) {
+					case CONNECT:
+						if (!connectedPeers.contains(pe.getPeerId())) {
+							connectedPeers.add(pe.getPeerId());
 							for (PeerEventListener peerListener : peerEventListeners) {
 								peerListener.onPeerEvent(pe);
 							}
-
-							break;
-
-						case NEW_ROUTE:
-							if (!connectedPeers.contains(pe.getPeerId())) {
-								for (PeerEventListener peerListener : peerEventListeners) {
-									peerListener.onPeerEvent(pe);
-								}
-							}
-							break;
-						case DISCONNECT:
-							if (connectedPeers.remove(pe.getPeerId())) {
-								for (PeerEventListener peerListener : peerEventListeners) {
-									peerListener.onPeerEvent(pe);
-								}
-							}
-							break;
 						}
 
+						break;
+
+					case NEW_ROUTE:
+						if (!connectedPeers.contains(pe.getPeerId())) {
+							for (PeerEventListener peerListener : peerEventListeners) {
+								peerListener.onPeerEvent(pe);
+							}
+						}
+						break;
+					case DISCONNECT:
+						if (connectedPeers.remove(pe.getPeerId())) {
+							for (PeerEventListener peerListener : peerEventListeners) {
+								peerListener.onPeerEvent(pe);
+							}
+						}
+						break;
 					}
 
 				}
 
+			}
+			
+			timeToSleep = 0;
+			for (AbstractService service : services) {
 				if (service.needsUpdate())
 					service.update();
 				timeToSleep = timeToSleep == 0 ? service.getNextExecutionTime()
@@ -345,7 +348,7 @@ public abstract class AbstractPeerGroup {
 				}
 
 			}
-			timeToSleep = 0;
+			
 
 		}
 
