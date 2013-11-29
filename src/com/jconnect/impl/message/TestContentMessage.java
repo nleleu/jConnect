@@ -6,6 +6,9 @@ import com.jconnect.core.message.AbstractContentMessage;
 public class TestContentMessage extends AbstractContentMessage{
 
 	private static final String TAG_DATE_PING = "test";
+	
+	
+	
 	private String testValue = "testv";
 	
 

@@ -15,6 +15,7 @@ public class TestService extends Service {
 
 	public TestService(AbstractPeerGroup group) {
 		super(group);
+		
 		group.registerOutputMessageListener(new OutputMessageListener() {
 
 			@Override
@@ -40,7 +41,7 @@ public class TestService extends Service {
 	}
 
 	@Override
-	protected void onHandleMessage(MessageEvent m) {
+	protected void onHandleMessageEvent(MessageEvent m) {
 		System.out.println("message : " + m.getState());
 		if (m.getState().equals(MessageEvent.State.MESSAGE_RECEIVED)) {
 			System.out.println("message receive: " + m.getMessage().getID());
@@ -50,17 +51,21 @@ public class TestService extends Service {
 	}
 
 	@Override
-	public boolean messageMatcher(MessageEvent message) {
+	public boolean messageEventMatcher(MessageEvent message) {
 		// TODO Auto-generated method stub
 		return true;
 	}
 
 	@Override
 	protected void onUpdade() {
+		
+		
+		
 		System.out.println("update");
 		sendMulticastMessage(new Message(group, new TestContentMessage()));
 		System.out.println("block 10s");
 		block(10000);
+		
 		return;
 
 	}

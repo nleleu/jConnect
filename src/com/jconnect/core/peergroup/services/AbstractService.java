@@ -110,7 +110,7 @@ public abstract class AbstractService {
 		 if(nextExecutionTime<0){
 			 restart();
 		 }
-		 onHandleMessage(m);
+		 onHandleMessageEvent(m);
 	}
 	
 	/**
@@ -118,14 +118,14 @@ public abstract class AbstractService {
 	 * Must be defined in extended class
 	 * @param m : Message to handle
 	 */
-	protected abstract void onHandleMessage(final MessageEvent m);
+	protected abstract void onHandleMessageEvent(final MessageEvent m);
 	
 	/**
 	 * Decides if a {@link MessageEvent} must be handled or not
 	 * @param message : MessageEvent to scan
 	 * @return true if the message must be handled, false otherwise
 	 */
-	public abstract boolean messageMatcher(final MessageEvent message);
+	public abstract boolean messageEventMatcher(final MessageEvent message);
 	
 
 	/**

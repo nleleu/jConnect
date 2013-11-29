@@ -1,16 +1,14 @@
 package com.jconnect.core.peergroup;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.jconnect.JConnect;
+import com.jconnect.core.IGate;
 import com.jconnect.core.event.MessageEvent;
-import com.jconnect.core.message.Message;
-import com.jconnect.core.model.RouteModel;
-import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.peer.PeerEvent;
-import com.jconnect.impl.peergroup.NetPeerGroup;
-import com.jconnect.util.uuid.PeerID;
+import com.jconnect.util.uuid.PeerGroupID;
 
 /**
  * PeerGroupManager
@@ -27,20 +25,27 @@ public class PeerGroupManager {
 		
 	}
 	
-	public void addPeerGroup(AbstractPeerGroup pg)
-	{
-		pg.setPeerGroupManager(this);
-		peerGroups.add(pg);
+	public AbstractPeerGroup newGroupInstance(Class<?> abstractPeerGroupClass, PeerGroupID peerGroupID) {
+		try {
+			AbstractPeerGroup pg = (AbstractPeerGroup) abstractPeerGroupClass.getConstructor(PeerGroupID.class, IGate.class).newInstance(peerGroupID, jConnect.getGate());
+			peerGroups.add(pg);
+			return pg;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
+		}
+		return null;
+		
 	}
 
+
 	
-	public void stop() {
+	public void stopAllGroup() {
 		for (AbstractPeerGroup peerGroup : peerGroups) {
 			peerGroup.stop();
 		}
 	}
 	
-	public void start() {
+	public void startAllGroup() {
 		for (AbstractPeerGroup peerGroup : peerGroups) {
 			peerGroup.start();
 		}
@@ -65,20 +70,9 @@ public class PeerGroupManager {
 	}
 	
 	
-	public void sendMessage(Message message,List<PeerID> receivers, TransportType protocol) {
-		jConnect.getGate().sendMessage(message, receivers, protocol);
-	}
+	
 
-	public void addPeerRoutes(List<RouteModel> routes) {
-		for (RouteModel routeModel : routes) {
-			jConnect.getGate().addRoute(routeModel);
-		}
-	}
-
-	public PeerID getPeerID() {
-		return jConnect.getPeerID();
-		
-	}
+	
 
 	
 

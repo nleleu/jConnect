@@ -43,7 +43,7 @@ import com.jconnect.util.uuid.PeerID;
  * Manages sockets, to operate Networks I/O Owns two threadpools, one for
  * sending, the other for receiving messages Handles servers' threads
  */
-public class Gate implements Runnable {
+public class Gate implements Runnable, IGate {
 
 	private Logger log = Logger.getLogger(AbstractPeerGroup.class.getName());
 
@@ -73,8 +73,11 @@ public class Gate implements Runnable {
 
 	private Timer timer;
 
+	private PeerID peerID;
+
 	public Gate(JConnect jConnect) {
 		this.jConnect = jConnect;
+		this.peerID = jConnect.getPrefs().getPeerID();
 	}
 
 	/**
@@ -305,7 +308,7 @@ public class Gate implements Runnable {
 																					// CONNECTIVITY
 																					// MESSAGE
 						if (event.getMessage().getPeer()
-								.equals(jConnect.getPeerID())) {// HAVE TO
+								.equals(getPeerID())) {// HAVE TO
 																// RESPOND
 							outputGateThreadPool.execute(new UDPOutputRunnable(
 									this, serverUDPSocket, event.getRoute(),
@@ -324,7 +327,7 @@ public class Gate implements Runnable {
 																					// sended
 																					// message
 					if (event.getMessage().getPeer()
-							.equals(jConnect.getPeerID())) {
+							.equals(getPeerID())) {
 						// ignore message
 						return;
 
@@ -501,6 +504,7 @@ public class Gate implements Runnable {
 					routes.add(getBestRoute(peerRoutesList));
 				}
 			}
+			//TODO si pas de route
 
 			for (RouteModel routeModel : routes) {
 				if (protocol == TransportType.TCP) { // TCP
@@ -554,6 +558,17 @@ public class Gate implements Runnable {
 
 		}
 
+	}
+
+	@Override
+	public void addPeerRoutes(RouteModel routeModel) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public PeerID getPeerID() {
+		return peerID;
 	}
 
 }

@@ -1,9 +1,13 @@
 package com.jconnect;
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.jconnect.core.Gate;
+import com.jconnect.core.IGate;
+import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.core.peergroup.PeerGroupManager;
 import com.jconnect.util.PreferencesStore;
-import com.jconnect.util.uuid.PeerID;
+import com.jconnect.util.uuid.PeerGroupID;
 
 public class JConnect {
 
@@ -11,7 +15,6 @@ public class JConnect {
 	private Gate gate;
 
 	private PeerGroupManager peerGroupManager;
-	private final PeerID peerID;
 
 	public JConnect() {
 		this(null);
@@ -24,23 +27,20 @@ public class JConnect {
 	
 	public JConnect(String prefPath) {
 		prefs = new PreferencesStore(prefPath);
-		peerID = prefs.getPeerID();
 		gate = new Gate(this);
 		peerGroupManager = new PeerGroupManager(this);
+		
+		
 		
 	}
 	
 	public PreferencesStore getPrefs() {
 		return prefs;
-	};
-	
-	public Gate getGate() {
-		return gate;
 	}
 
-
-	public PeerID getPeerID() {
-		return peerID;
+//TODO remove
+	public Gate getGate() {
+		return gate;
 	}
 
 }

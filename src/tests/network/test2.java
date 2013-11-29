@@ -1,10 +1,7 @@
 package tests.network;
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.jconnect.JConnect;
-import com.jconnect.core.message.Message;
 import com.jconnect.impl.peergroup.NetPeerGroup;
 import com.jconnect.util.WindowApp;
 
@@ -23,9 +20,8 @@ public class test2 {
 			e.printStackTrace();
 		}
 		
-		NetPeerGroup netPeerGroup = new NetPeerGroup();
-		jconnect.getPeerGroupManager().addPeerGroup(netPeerGroup);
-		jconnect.getPeerGroupManager().start();
+		NetPeerGroup netPeerGroup = (NetPeerGroup) jconnect.getPeerGroupManager().newGroupInstance(NetPeerGroup.class, NetPeerGroup.NETPEERGROUP_UUID);
+		jconnect.getPeerGroupManager().startAllGroup();
 		
 		//jconnect.getGate().sendMulticastMessage(new Message("test").toString());
 		Runtime.getRuntime().addShutdownHook(new Thread()
@@ -35,6 +31,7 @@ public class test2 {
             {
                 System.out.println("Shutdown hook ran!");
                 jconnect.getGate().stop();
+                jconnect.getPeerGroupManager().stopAllGroup();
             }
         });
 		WindowApp w = new WindowApp();

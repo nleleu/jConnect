@@ -13,6 +13,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.jconnect.core.IGate;
 import com.jconnect.core.event.MessageEvent;
 import com.jconnect.core.event.OutputMessageListener;
 import com.jconnect.core.event.PeerEventListener;
@@ -40,7 +41,7 @@ public abstract class AbstractPeerGroup {
 	private List<AbstractService> runningServices = new ArrayList<AbstractService>();
 
 	private Thread thread;
-	protected PeerGroupManager peerGroupManager;
+	//protected PeerGroupManager peerGroupManager;
 	Key securityKey = null;
 
 	private List<PeerID> connectedPeers = new ArrayList<PeerID>();
@@ -54,14 +55,20 @@ public abstract class AbstractPeerGroup {
 
 	private Map<ConversationID, RequestHandler> requestHandles = new HashMap<ConversationID, RequestHandler>();
 
-	public AbstractPeerGroup(PeerGroupID uuid) {
-		this.uuid = uuid;
-		thread = new GroupThread();
-	}
+	private IGate gate;
 
-	public AbstractPeerGroup(Key securityKey, PeerGroupID uuid) {
+	public abstract AbstractPeerGroup newIntance(PeerGroupID uuid, IGate gate);
+	
+	protected AbstractPeerGroup(PeerGroupID uuid, IGate gate) {
 		this.uuid = uuid;
+		this.gate = gate;
 		thread = new GroupThread();
+		initServices();
+	}
+	
+	protected abstract void initServices();
+	
+	public void setSecurityKey(Key securityKey){
 		this.securityKey = securityKey;
 	}
 
@@ -154,7 +161,10 @@ public abstract class AbstractPeerGroup {
 	}
 
 	public void addPeerRoutes(List<RouteModel> routes) {
-		peerGroupManager.addPeerRoutes(routes);
+		for (RouteModel routeModel : routes) {
+			gate.addPeerRoutes(routeModel);
+		}
+		
 	}
 
 	public PeerGroupID getuUID() {
@@ -197,7 +207,7 @@ public abstract class AbstractPeerGroup {
 		if (securityKey != null) {
 			message.encode(securityKey);
 		}
-		peerGroupManager.sendMessage(message, receivers, protocol);
+		gate.sendMessage(message, receivers, protocol);
 	}
 
 	/**
@@ -224,14 +234,7 @@ public abstract class AbstractPeerGroup {
 		sendMessage(message, receivers, protocol);
 	}
 
-	/**
-	 * Should never be called. Used by library core
-	 * 
-	 * @param peerGroupManager
-	 */
-	public void setPeerGroupManager(PeerGroupManager peerGroupManager) {
-		this.peerGroupManager = peerGroupManager;
-	}
+	
 
 	private class GroupThread extends Thread {
 
@@ -272,7 +275,7 @@ public abstract class AbstractPeerGroup {
 						}
 					}
 					for (AbstractService service : services) {
-						if (service.messageMatcher(me))
+						if (service.messageEventMatcher(me))
 							service.handleMessage(me);
 					}
 				}
@@ -366,7 +369,7 @@ public abstract class AbstractPeerGroup {
 	}
 
 	public PeerID getPeerID() {
-		return peerGroupManager.getPeerID();
+		return gate.getPeerID();
 	}
 
 }

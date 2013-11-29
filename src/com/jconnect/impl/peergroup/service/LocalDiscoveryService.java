@@ -12,13 +12,13 @@ public class LocalDiscoveryService extends Service{
 	}
 
 	@Override
-	protected void onHandleMessage(MessageEvent m) {
+	protected void onHandleMessageEvent(MessageEvent m) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public boolean messageMatcher(MessageEvent message) {
+	public boolean messageEventMatcher(MessageEvent message) {
 		// TODO Auto-generated method stub
 		return false;
 	}
