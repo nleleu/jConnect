@@ -52,13 +52,14 @@ public class ServerMulticastThread extends Thread {
 				ev.setRoute(new RouteModel(ev.getMessage().getPeer(), new InetSocketAddress(recv.getAddress(),recv.getPort()), TransportType.MULTICAST));
 
 				parent.addEvent(ev);
+				
 
 			}
 
 
-
+			 
 		} catch (IOException e) {
-			log.log(Level.DEBUG, "Server MULTICAST thread close :"+e.getMessage()); 
+			log.log(Level.INFO, "Server MULTICAST thread close :"+e.getMessage()); 
 		}
 
 

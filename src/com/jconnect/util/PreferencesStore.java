@@ -53,6 +53,15 @@ public class PreferencesStore {
 	    prefs = Preferences.userNodeForPackage(JConnect.class);
 		
 	}
+	
+	private void save() {
+		try {
+			prefs.sync();
+		} catch (BackingStoreException e) {
+			e.printStackTrace();
+		}
+	}
+	
 
 	public boolean isTCP() {
 		return prefs.getBoolean(TAG_TCP, true);
@@ -70,15 +79,29 @@ public class PreferencesStore {
 	public int getTCPPort() {
 		return prefs.getInt(TAG_TCP_PORT, 3019);
 	}
+	public void setTCPPort(int port) {
+		prefs.putInt(TAG_TCP_PORT, port);
+		save();
+	}
+	
 
 	public int getUDPPort() {
 		return prefs.getInt(TAG_UDP_PORT, 3019);
 	}
+	public void setUDPPort(int port) {
+		prefs.putInt(TAG_UDP_PORT, port);
+		save();
+	}
+	
 
 	public int getMulticastPort() {
 		return prefs.getInt(TAG_MULTICAST_PORT, 3011);
 	}
-
+	public void setMulticastPort(int port) {
+		prefs.putInt(TAG_MULTICAST_PORT, port);
+		save();
+	}
+	
 	public int getTCPSendAttempt() {
 		return prefs.getInt(TAG_SEND_ATTEMPT, 3);
 	}
@@ -89,11 +112,7 @@ public class PreferencesStore {
 		if (id == null) {
 			peerId = PeerID.generate();
 			prefs.put(TAG_PEERID, peerId.toString());
-			try {
-				prefs.sync();
-			} catch (BackingStoreException e) {
-				e.printStackTrace();
-			}
+			save();
 		} else {
 			peerId = new PeerID(id);
 		}
@@ -122,12 +141,10 @@ public class PreferencesStore {
 			json.add(obj);
 		}
 		prefs.put(TAG_PEERGROUPS, json.toString());
-		try {
-			prefs.sync();
-		} catch (BackingStoreException e) {
-			e.printStackTrace();
-		}
+		save();
 
 	}
+
+	
 
 }

@@ -2,6 +2,8 @@ package com.jconnect.util.uuid;
 
 import java.util.UUID;
 
+import javax.jws.HandlerChain;
+
 /**
  *  Abstract class of JConnect's UUID
  *
@@ -35,12 +37,17 @@ public abstract class AbstractUUID {
 		return prefix+":"+uuid.toString();
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		return obj.toString().equals(toString());
+		
+	};
 	
-	public boolean equals(AbstractUUID other)
-	{
-		return other.toString().equals(toString());
-	}
 	
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	};
 	
 
 	protected static UUID generateUUID() {

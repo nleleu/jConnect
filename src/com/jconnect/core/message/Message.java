@@ -70,7 +70,11 @@ public class Message {
 	}
 
 	public void decrypt(Key key) throws InvalidKeyException {
-		String decodedContent = CryptionUtil.decrypt(key, encodedContent);
+		String decodedContent = encodedContent;
+		if(key!=null){
+			decodedContent = CryptionUtil.decrypt(key, encodedContent);
+		}
+		 
 		content = MessageContentFactory.createMessageContent(decodedContent);
 	}
 

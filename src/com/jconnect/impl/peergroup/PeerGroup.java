@@ -1,11 +1,13 @@
 package com.jconnect.impl.peergroup;
 
+import com.jconnect.core.Gate;
 import com.jconnect.core.IGate;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.impl.peergroup.service.ConnectivityService;
 import com.jconnect.impl.peergroup.service.LocalDiscoveryService;
 import com.jconnect.impl.peergroup.service.RendezVousService;
 import com.jconnect.util.uuid.PeerGroupID;
+import com.jconnect.util.uuid.PeerID;
 
 public class PeerGroup extends AbstractPeerGroup {
 
@@ -46,6 +48,8 @@ public class PeerGroup extends AbstractPeerGroup {
 	public RendezVousService getRendezVousService() {
 		return rendezVousService;
 	}
+
+	
 
 
 

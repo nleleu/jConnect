@@ -9,6 +9,7 @@ import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -78,6 +80,9 @@ public class Gate implements Runnable, IGate {
 	public Gate(JConnect jConnect) {
 		this.jConnect = jConnect;
 		this.peerID = jConnect.getPrefs().getPeerID();
+		
+		
+		
 	}
 
 	/**
@@ -95,6 +100,7 @@ public class Gate implements Runnable, IGate {
 					.newFixedThreadPool(Constants.NB_OUTPUT_THREAD);
 			// open Input Gate
 			if (jConnect.getPrefs().isTCP()) {
+				
 				serverTCPSocket = new ServerSocket(jConnect.getPrefs()
 						.getTCPPort());
 				serverTCPThread = new ServerTCPThread(this, serverTCPSocket);
@@ -118,6 +124,17 @@ public class Gate implements Runnable, IGate {
 				mainThread = new Thread(this);
 				mainThread.start();
 
+			}
+			
+			try {
+				peerRoutes.clear();
+				InetSocketAddress TCPaddress = new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), jConnect.getPrefs().getTCPPort());
+				addRoute(new RouteModel(getPeerID(), TCPaddress, TransportType.TCP));
+				InetSocketAddress UDPaddress = new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), jConnect.getPrefs().getUDPPort());
+				addRoute(new RouteModel(getPeerID(), UDPaddress, TransportType.UDP));
+				
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
 			}
 		} catch (IOException e) {
 			stop();
@@ -262,8 +279,6 @@ public class Gate implements Runnable, IGate {
 					wait();
 				}
 
-				timer.cancel();
-				timer = new Timer();
 
 			}
 		} catch (InterruptedException e) {
@@ -304,16 +319,16 @@ public class Gate implements Runnable, IGate {
 			{
 				event.getRoute().lastReception = System.currentTimeMillis();
 				if (event.getTransportType() == TransportType.UDP) {
-					if (event.getMessage().getGroup().equals(PeerGroupID.NULL)) {// CHECK
-																					// CONNECTIVITY
-																					// MESSAGE
+					if (event.getMessage().getGroup().equals(PeerGroupID.NULL)) {// PING MESSAGE
+						//TODO securite sur les pings (ici on repond à tout le monde)
 						if (event.getMessage().getPeer()
-								.equals(getPeerID())) {// HAVE TO
-																// RESPOND
+								.equals(getPeerID())) {// HAVE TO RESPOND
 							outputGateThreadPool.execute(new UDPOutputRunnable(
 									this, serverUDPSocket, event.getRoute(),
 									event.getMessage()));
+							return;
 						} else {
+							
 							event.getRoute().lastSend = event.getMessage()
 									.getDate();
 
@@ -332,7 +347,6 @@ public class Gate implements Runnable, IGate {
 						return;
 
 					}
-
 				}
 
 				Message m = event.getMessage();
@@ -395,9 +409,9 @@ public class Gate implements Runnable, IGate {
 
 	}
 
-	public void addRoute(RouteModel route) {
+	public boolean addRoute(RouteModel route) {
 		if (route.getTransportType().equals(TransportType.MULTICAST))
-			return;
+			return false;
 		synchronized (peerRoutes) {
 
 			List<RouteModel> routes = peerRoutes.get(route.getContactUUID());
@@ -409,9 +423,9 @@ public class Gate implements Runnable, IGate {
 							PeerEvent.EVENT.NEW_ROUTE);
 					jConnect.getPeerGroupManager().addPeerEvent(pEvent);
 					log.log(Level.INFO, "Peer " + route.getContactUUID()
-							+ " new route");
+							+ " new route "+route.getSocketAddress().toString());
 				} else {
-					if (route.lastPing > 0) {
+					if (route.lastPing >= 0) {
 						RouteModel r = routes.get(routes.indexOf(route));
 						r.lastReception = route.lastReception;
 						r.lastPing = route.lastPing;
@@ -419,15 +433,14 @@ public class Gate implements Runnable, IGate {
 					}
 
 				}
+				return false;
 			} else {
 				routes = new ArrayList<RouteModel>();
 				routes.add(route);
 				peerRoutes.put(route.getContactUUID(), routes);
-				// PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
-				// PeerEvent.EVENT.CONNECT);
-				// jConnect.getPeerGroupManager().addPeerEvent(pEvent);
-				log.log(Level.INFO, "Peer " + route.getContactUUID()
-						+ " connected");
+				log.log(Level.INFO, "Peer " + peerRoutes.size()+route.getContactUUID()
+						+ " connected "+route.getSocketAddress().toString());
+				return true;
 			}
 
 		}
@@ -438,6 +451,7 @@ public class Gate implements Runnable, IGate {
 			List<RouteModel> routes = peerRoutes.get(route.getContactUUID());
 			routes.remove(route);
 			if (routes.size() == 0) { // Peer Disconnected
+				peerRoutes.remove(route.getContactUUID());
 				PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
 						PeerEvent.EVENT.DISCONNECT);
 				jConnect.getPeerGroupManager().addPeerEvent(pEvent);
@@ -447,8 +461,9 @@ public class Gate implements Runnable, IGate {
 		}
 	}
 
+	@Override
 	public void checkPeerUDPConnectivity(final PeerID pId,
-			final long millisRefreshInterval, long responseTimeOut) {
+			final long millisRefreshInterval, final long responseTimeOut) {
 		List<RouteModel> routes = getPeerRoute(pId, TransportType.UDP);
 		final List<RouteModel> refreshList = new ArrayList<RouteModel>();
 		Message m = Message.getEmptyMessage(pId);
@@ -467,7 +482,7 @@ public class Gate implements Runnable, IGate {
 			@Override
 			public void run() {
 				for (RouteModel routeModel : refreshList) {
-					if (routeModel.lastReception + millisRefreshInterval < System
+					if (routeModel.lastReception + millisRefreshInterval+responseTimeOut < System
 							.currentTimeMillis()) {
 						removeRoute(routeModel);
 					}
@@ -521,7 +536,8 @@ public class Gate implements Runnable, IGate {
 
 	}
 
-	private List<RouteModel> getPeerRoute(PeerID peerID, TransportType protocol) {
+	@Override
+	public	List<RouteModel> getPeerRoute(PeerID peerID, TransportType protocol) {
 		List<RouteModel> result = new ArrayList<RouteModel>();
 		List<RouteModel> routes = peerRoutes.get(peerID);
 		if (routes != null) {
@@ -560,15 +576,14 @@ public class Gate implements Runnable, IGate {
 
 	}
 
-	@Override
-	public void addPeerRoutes(RouteModel routeModel) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public PeerID getPeerID() {
 		return peerID;
 	}
+
+
+
+	
 
 }

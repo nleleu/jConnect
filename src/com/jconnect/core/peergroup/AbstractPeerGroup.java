@@ -162,7 +162,9 @@ public abstract class AbstractPeerGroup {
 
 	public void addPeerRoutes(List<RouteModel> routes) {
 		for (RouteModel routeModel : routes) {
-			gate.addPeerRoutes(routeModel);
+			if(gate.addRoute(routeModel)){
+				addPeerEvent(new PeerEvent(routeModel.getContactUUID(), EVENT.CONNECT));
+			}
 		}
 		
 	}
@@ -172,8 +174,18 @@ public abstract class AbstractPeerGroup {
 	}
 
 	public void addMessageEvent(MessageEvent mEvent) {
+		
+		
+		
 		if (mEvent.getState() == MessageEvent.State.MESSAGE_RECEIVED) {
-			if (!connectedPeers.contains(mEvent.getMessage().getPeer())) {
+			try {
+				mEvent.getMessage().decrypt(securityKey);
+			} catch (InvalidKeyException e) {
+				e.printStackTrace();
+				return;
+			}
+			log.info(getuUID()+" received a message:" + mEvent.getMessage().getContent());
+			if (!connectedPeers.contains(mEvent.getMessage().getPeer())&&gate.getPeerRoute(mEvent.getMessage().getPeer(),null).size()>0) {
 				addPeerEvent(new PeerEvent(mEvent.getMessage().getPeer(),
 						EVENT.CONNECT));
 			}
@@ -210,6 +222,7 @@ public abstract class AbstractPeerGroup {
 		gate.sendMessage(message, receivers, protocol);
 	}
 
+	
 	/**
 	 * 
 	 * Call send message and set a call back to handle future answers
@@ -235,7 +248,10 @@ public abstract class AbstractPeerGroup {
 	}
 
 	
-
+	public List<PeerID> getConnectedPeers() {
+		return connectedPeers;
+	}
+	
 	private class GroupThread extends Thread {
 
 		private static final long MAX_THREAD_SLEEP_TIME = 20000;
@@ -371,8 +387,17 @@ public abstract class AbstractPeerGroup {
 			blockedServices.add(abstractService);
 	}
 
-	public PeerID getPeerID() {
+	public PeerID getPeerID(){
 		return gate.getPeerID();
 	}
+	public List<RouteModel> getPeerRoute(PeerID peerID, TransportType protocol) {
+		return gate.getPeerRoute(peerID, protocol);
+	}
+
+	public void checkPeerUDPConnectivity(PeerID peerID, long millisRefreshInterval, long responseTimeOut) {
+		gate.checkPeerUDPConnectivity(peerID, millisRefreshInterval, responseTimeOut);
+	}
+	
+	
 
 }

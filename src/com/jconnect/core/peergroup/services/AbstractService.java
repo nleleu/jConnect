@@ -118,16 +118,16 @@ public abstract class AbstractService {
 	/**
 	 * execute on message reception
 	 * Must be defined in extended class
-	 * @param m : Message to handle
+	 * @param messageEvent : Message to handle
 	 */
-	protected abstract void onHandleMessageEvent(final MessageEvent m);
+	protected abstract void onHandleMessageEvent(final MessageEvent messageEvent);
 	
 	/**
 	 * Decides if a {@link MessageEvent} must be handled or not
-	 * @param message : MessageEvent to scan
+	 * @param messageEvent : MessageEvent
 	 * @return true if the message must be handled, false otherwise
 	 */
-	public abstract boolean messageEventMatcher(final MessageEvent message);
+	public abstract boolean messageEventMatcher(final MessageEvent messageEvent);
 	
 
 	/**
