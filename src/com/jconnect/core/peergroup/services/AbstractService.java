@@ -1,8 +1,8 @@
 package com.jconnect.core.peergroup.services;
 
-import java.sql.Blob;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import com.jconnect.core.event.MessageEvent;
 import com.jconnect.core.message.Message;
@@ -76,8 +76,10 @@ public abstract class AbstractService {
 	protected void block(long timeInMillis){
 		if(timeInMillis<0){
 			nextExecutionTime = -1;
+			group.blockService(this);
+		}else{
+			nextExecutionTime = System.currentTimeMillis()+timeInMillis;
 		}
-		nextExecutionTime = System.currentTimeMillis()+timeInMillis;
 	}
 
 		

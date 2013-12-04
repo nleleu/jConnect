@@ -25,7 +25,7 @@ public class TrackerService extends Service{
 
 	@Override
 	protected void onUpdade() {
-		// TODO Auto-generated method stub
+		block();
 		
 	}
 	

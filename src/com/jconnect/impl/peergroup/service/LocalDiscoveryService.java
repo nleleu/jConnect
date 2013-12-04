@@ -1,5 +1,7 @@
 package com.jconnect.impl.peergroup.service;
 
+import javax.swing.plaf.SliderUI;
+
 import com.jconnect.core.event.MessageEvent;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 
@@ -25,7 +27,7 @@ public class LocalDiscoveryService extends Service{
 
 	@Override
 	protected void onUpdade() {
-		// TODO Auto-generated method stub
+		block();
 		
 	}
 

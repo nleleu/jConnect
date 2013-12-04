@@ -10,8 +10,8 @@ import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import com.jconnect.core.IGate;
 import com.jconnect.core.event.MessageEvent;
@@ -117,7 +117,7 @@ public abstract class AbstractPeerGroup {
 		case WAITING:
 		case TIMED_WAITING:
 		case RUNNABLE:
-			log.log(Level.WARNING, "Group " + uuid
+			log.log(Level.WARN, "Group " + uuid
 					+ " already running. Thread state:" + thread.getState());
 			break;
 
@@ -128,7 +128,7 @@ public abstract class AbstractPeerGroup {
 		switch (thread.getState()) {
 		case TERMINATED:
 		case NEW:
-			log.log(Level.WARNING, "Group " + uuid
+			log.log(Level.WARN, "Group " + uuid
 					+ " not running. Thread state:" + thread.getState());
 
 			break;
@@ -238,24 +238,27 @@ public abstract class AbstractPeerGroup {
 
 	private class GroupThread extends Thread {
 
+		private static final long MAX_THREAD_SLEEP_TIME = 20000;
 		private long timeToSleep = 0;
-		private Timer timer = new Timer();
+		private Timer timer;
 
+		
+		
 		@Override
 		public void run() {
-
-			log.log(Level.FINER, "Group " + uuid + " started");
-
+			log.log(Level.INFO, "Group " + uuid + " started");
+			timer = new Timer();
 			try {
 				while (thread.getState() == Thread.State.RUNNABLE) {
 					update();
 
 				}
+				
 			} catch (InterruptedException e) {
 
 			}
-
-			log.log(Level.FINER, "Group " + uuid + " stopped");
+			timer.cancel();
+			log.log(Level.INFO, "Group " + uuid + " stopped");
 
 		}
 
@@ -323,12 +326,12 @@ public abstract class AbstractPeerGroup {
 
 			}
 			
-			timeToSleep = 0;
-			for (AbstractService service : services) {
+			timeToSleep = System.currentTimeMillis()+MAX_THREAD_SLEEP_TIME;
+			for (int i = runningServices.size()-1; i >=0 ; i--) {
+				AbstractService service = runningServices.get(i);
 				if (service.needsUpdate())
 					service.update();
-				timeToSleep = timeToSleep == 0 ? service.getNextExecutionTime()
-						: Math.min(timeToSleep, service.getNextExecutionTime());
+				timeToSleep = Math.min(timeToSleep, service.getNextExecutionTime());
 			}
 
 			timeToSleep = timeToSleep - System.currentTimeMillis();

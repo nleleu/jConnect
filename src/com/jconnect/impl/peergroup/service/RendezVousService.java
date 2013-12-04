@@ -32,7 +32,7 @@ public class RendezVousService extends Service implements PeerListener{
 
 	@Override
 	protected void onUpdade() {
-		// TODO Auto-generated method stub
+		block();
 		
 	}
 

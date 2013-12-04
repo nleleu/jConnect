@@ -3,8 +3,8 @@ package com.jconnect.core;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.util.Constants;
@@ -36,7 +36,7 @@ public class ServerTCPThread extends Thread {
 
 			}
 		} catch (IOException e) {
-			log.log(Level.FINER, "Server TCP thread close :"+e.getMessage()); 
+			log.log(Level.DEBUG, "Server TCP thread close :"+e.getMessage()); 
 		}
 		
 

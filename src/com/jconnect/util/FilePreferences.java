@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
 
@@ -27,7 +27,7 @@ public class FilePreferences extends AbstractPreferences
   {
     super(parent, name);
  
-    log.finest("Instantiating node " + name);
+    log.info("Instantiating node " + name);
  
     root = new TreeMap<String, String>();
     children = new TreeMap<String, FilePreferences>();
@@ -36,7 +36,7 @@ public class FilePreferences extends AbstractPreferences
       sync();
     }
     catch (BackingStoreException e) {
-      log.log(Level.SEVERE, "Unable to sync on creation of node " + name, e);
+      log.log(Level.ERROR, "Unable to sync on creation of node " + name, e);
     }
   }
  
@@ -47,7 +47,7 @@ public class FilePreferences extends AbstractPreferences
       flush();
     }
     catch (BackingStoreException e) {
-      log.log(Level.SEVERE, "Unable to flush after putting " + key, e);
+      log.log(Level.ERROR, "Unable to flush after putting " + key, e);
     }
   }
  
@@ -63,7 +63,7 @@ public class FilePreferences extends AbstractPreferences
       flush();
     }
     catch (BackingStoreException e) {
-      log.log(Level.SEVERE, "Unable to flush after removing " + key, e);
+      log.log(Level.ERROR, "Unable to flush after removing " + key, e);
     }
   }
  

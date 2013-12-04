@@ -19,8 +19,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import com.jconnect.JConnect;
 import com.jconnect.core.event.MessageEvent;
@@ -204,7 +204,7 @@ public class Gate implements Runnable, IGate {
 
 	@Override
 	public void run() {
-		log.log(Level.FINER, "Gate Thread Started");
+		log.log(Level.INFO, "Gate Thread Started");
 		try {
 			while (mainThread != null
 					&& mainThread.getState() == State.RUNNABLE) {
@@ -267,9 +267,9 @@ public class Gate implements Runnable, IGate {
 
 			}
 		} catch (InterruptedException e) {
-			log.log(Level.FINER, "Gate Thread Interupted");
+			log.log(Level.INFO, "Gate Thread Interupted");
 		}
-		log.log(Level.FINER, "Gate Thread Terminated");
+		log.log(Level.INFO, "Gate Thread Terminated");
 
 	}
 
@@ -282,7 +282,7 @@ public class Gate implements Runnable, IGate {
 				outputSockets.put(addr, new SocketConnectivityInfo(s));
 				return s;
 			} catch (IOException e) {
-				log.log(Level.SEVERE,
+				log.log(Level.ERROR,
 						"Can't open new socket: " + e.getMessage());
 				return null;
 			}
@@ -346,7 +346,7 @@ public class Gate implements Runnable, IGate {
 			break;
 		case SEND_FAIL:
 		case SOCKET_CLOSED:
-			log.log(Level.FINER, "SOCKET CLOSED");
+			log.log(Level.DEBUG, "SOCKET CLOSED");
 			if (event.getRoute() != null) { // only TCP¨have retry
 				if ((event.getTryCount() + 1) < jConnect.getPrefs()
 						.getTCPSendAttempt()) {
@@ -354,7 +354,7 @@ public class Gate implements Runnable, IGate {
 					outputGateThreadPool.execute(new TCPOutputRunnable(this,
 							event.getRoute(), event.getMessage(), event
 									.getTryCount() + 1));
-					log.log(Level.FINER, "attempt " + (event.getTryCount() + 1)
+					log.log(Level.INFO, "attempt " + (event.getTryCount() + 1)
 							+ " on "
 							+ event.getRoute().getSocketAddress().toString());
 					break;
@@ -368,7 +368,7 @@ public class Gate implements Runnable, IGate {
 			jConnect.getPeerGroupManager().addMessageEvent(e);
 			break;
 		case INPUT_TIME_OUT:
-			log.log(Level.WARNING, "Input Time Out");
+			log.log(Level.DEBUG, "Input Time Out");
 			break;
 		case SEND_SUCCESS:
 			if (event.getTransportType().equals(TransportType.TCP)) {
@@ -408,7 +408,7 @@ public class Gate implements Runnable, IGate {
 					PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
 							PeerEvent.EVENT.NEW_ROUTE);
 					jConnect.getPeerGroupManager().addPeerEvent(pEvent);
-					log.log(Level.FINER, "Peer " + route.getContactUUID()
+					log.log(Level.INFO, "Peer " + route.getContactUUID()
 							+ " new route");
 				} else {
 					if (route.lastPing > 0) {
@@ -426,7 +426,7 @@ public class Gate implements Runnable, IGate {
 				// PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
 				// PeerEvent.EVENT.CONNECT);
 				// jConnect.getPeerGroupManager().addPeerEvent(pEvent);
-				log.log(Level.FINER, "Peer " + route.getContactUUID()
+				log.log(Level.INFO, "Peer " + route.getContactUUID()
 						+ " connected");
 			}
 
@@ -441,7 +441,7 @@ public class Gate implements Runnable, IGate {
 				PeerEvent pEvent = new PeerEvent(route.getContactUUID(),
 						PeerEvent.EVENT.DISCONNECT);
 				jConnect.getPeerGroupManager().addPeerEvent(pEvent);
-				log.log(Level.FINER, "Peer " + route.getContactUUID()
+				log.log(Level.INFO, "Peer " + route.getContactUUID()
 						+ " disconnected");
 			}
 		}

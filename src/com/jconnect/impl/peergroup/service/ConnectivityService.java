@@ -25,7 +25,7 @@ public class ConnectivityService extends Service{
 
 	@Override
 	protected void onUpdade() {
-		// TODO Auto-generated method stub
+		block();
 		
 	}
 	

@@ -1,7 +1,7 @@
 package com.jconnect.util;
 
 import java.io.File;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import java.util.prefs.Preferences;
 import java.util.prefs.PreferencesFactory;
 
@@ -21,7 +21,7 @@ public class FilePreferencesFactory implements PreferencesFactory
   public Preferences userRoot()
   {
     if (rootPreferences == null) {
-      log.finer("Instantiating root preferences");
+      log.info("Instantiating root preferences");
  
       rootPreferences = new FilePreferences(null, "");
     }
@@ -38,7 +38,7 @@ public class FilePreferencesFactory implements PreferencesFactory
         prefsFile = System.getProperty("user.home") + File.separator + ".fileprefs";
       }
       preferencesFile = new File(prefsFile).getAbsoluteFile();
-      log.finer("Preferences file is " + preferencesFile);
+      log.info("Preferences file is " + preferencesFile);
     }
     return preferencesFile;
   }

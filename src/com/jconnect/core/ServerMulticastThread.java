@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import com.jconnect.core.event.TransferEvent;
 import com.jconnect.core.message.Message;
@@ -58,7 +58,7 @@ public class ServerMulticastThread extends Thread {
 
 
 		} catch (IOException e) {
-			log.log(Level.FINER, "Server MULTICAST thread close :"+e.getMessage()); 
+			log.log(Level.DEBUG, "Server MULTICAST thread close :"+e.getMessage()); 
 		}
 
 
