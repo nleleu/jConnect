@@ -97,9 +97,9 @@ public abstract class AbstractPeerGroup {
 		blockedServices.remove(service);
 	}
 
-	public AbstractService getService(String serviceName) {
+	public AbstractService getService(Class<?> serviceClass) {
 		for (AbstractService service : services) {
-			if (service.getClass().getName().equals(serviceName)) {
+			if (service.getClass().equals(serviceClass)) {
 				return service;
 			}
 		}

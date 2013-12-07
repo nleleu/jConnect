@@ -6,7 +6,6 @@ import java.util.List;
 import com.jconnect.core.event.MessageEvent;
 import com.jconnect.core.message.Message;
 import com.jconnect.core.model.RouteModel;
-import com.jconnect.core.model.RouteModel.TransportType;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.impl.message.RouteContentMessage;
 import com.jconnect.util.uuid.PeerID;
@@ -41,11 +40,11 @@ public class LocalDiscoveryService extends Service {
 			RouteContentMessage content = new RouteContentMessage();
 			for (PeerID peerID : connectedPeers) {
 				content.addRoutes(group.getPeerRoute(peerID,
-						TransportType.UDP));
+						null));
 			}
 			
 			content.addRoutes(group.getPeerRoute(
-					getPeerGroup().getPeerID(), TransportType.UDP));
+					getPeerGroup().getPeerID(), null));
 			Message m = new Message(group, content);
 			sendMulticastMessage(m);
 		} else {

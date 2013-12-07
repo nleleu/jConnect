@@ -5,6 +5,7 @@ import java.security.Key;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.jconnect.core.peergroup.AbstractPeerGroup;
 import com.jconnect.core.security.CryptionUtil;
 import com.jconnect.util.uuid.ConversationID;
@@ -17,7 +18,8 @@ import com.jconnect.util.uuid.PeerID;
  */
 public class Message {
 
-	
+	//TODO merger content message et message
+	//TODO ajouter champ receiver
 	private final static String TAG_ID = "id";
 	private final static String TAG_DATE = "date";
 	private final static String TAG_GROUP = "group_id";
@@ -59,7 +61,7 @@ public class Message {
 		peer = peerid;
 	}
 	
-	private Message(String msg) {
+	private Message(String msg) throws JsonSyntaxException{
 		JsonParser parser = new JsonParser();
 		JsonObject json = (JsonObject) parser.parse(msg);
 		conversationID = new ConversationID(json.get(TAG_ID).getAsString());

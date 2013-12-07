@@ -517,10 +517,12 @@ public class Gate implements Runnable, IGate {
 				List<RouteModel> peerRoutesList = getPeerRoute(peerID, protocol);
 				if (peerRoutesList.size() > 0) {
 					routes.add(getBestRoute(peerRoutesList));
+				}else{
+					log.warn("No Route to "+peerID+" with protocol"+protocol);
+					//TODO remonter l'erreur
 				}
 			}
-			//TODO si pas de route
-
+			
 			for (RouteModel routeModel : routes) {
 				if (protocol == TransportType.TCP) { // TCP
 
