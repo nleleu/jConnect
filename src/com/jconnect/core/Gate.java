@@ -56,7 +56,8 @@ public class Gate implements Runnable, IGate {
 
 	private ServerSocket serverTCPSocket;
 
-	private MulticastSocket serverMulticastSocket = null;
+	private MulticastSocket receiverMulticastSocket = null;
+	private MulticastSocket senderMulticastSocket = null;
 	private DatagramSocket serverUDPSocket = null;
 	private InetAddress multicastGroup;
 
@@ -114,12 +115,14 @@ public class Gate implements Runnable, IGate {
 			}
 			if (jConnect.getPrefs().isMulticast()) {
 				multicastGroup = InetAddress.getByName(Constants.MULTICAST_IP);
-				serverMulticastSocket = new MulticastSocket(jConnect.getPrefs()
+				receiverMulticastSocket = new MulticastSocket(jConnect.getPrefs()
 						.getMulticastPort());
-				// serverMulticastSocket.setTimeToLive(0);
-				serverMulticastSocket.joinGroup(multicastGroup);
+				senderMulticastSocket = new MulticastSocket(jConnect.getPrefs()
+						.getMulticastPort());
+				senderMulticastSocket.setTimeToLive(255);
+				receiverMulticastSocket.joinGroup(multicastGroup);
 				serverMulticastThread = new ServerMulticastThread(this,
-						serverMulticastSocket);
+						receiverMulticastSocket);
 				serverMulticastThread.start();
 				mainThread = new Thread(this);
 				mainThread.start();
@@ -188,9 +191,18 @@ public class Gate implements Runnable, IGate {
 			serverUDPThread = null;
 		}
 
-		if (serverMulticastSocket != null) {
-			serverMulticastSocket.close();
-			serverMulticastSocket = null;
+		if (receiverMulticastSocket != null) {
+			try {
+				receiverMulticastSocket.leaveGroup(multicastGroup);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			receiverMulticastSocket.close();
+			receiverMulticastSocket = null;
+		}
+		if (senderMulticastSocket != null) {
+			senderMulticastSocket.close();
+			senderMulticastSocket = null;
 		}
 		if (serverMulticastThread != null) {
 			serverMulticastThread.interrupt();
@@ -343,7 +355,6 @@ public class Gate implements Runnable, IGate {
 																					// message
 					if (event.getMessage().getPeer()
 							.equals(getPeerID())) {
-						// ignore message
 						return;
 
 					}
@@ -508,7 +519,7 @@ public class Gate implements Runnable, IGate {
 
 		if (receivers == null) { // MULTICAST
 			outputGateThreadPool.execute(new MulticastOutputRunnable(this,
-					serverMulticastSocket, multicastGroup, jConnect.getPrefs()
+					senderMulticastSocket, multicastGroup, jConnect.getPrefs()
 							.getMulticastPort(), message));
 		} else {
 			// retrieving peer's routes
