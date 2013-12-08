@@ -1,4 +1,4 @@
 bin/
 gen/
-jconnect/
+./jconnect/
 conf.ini
