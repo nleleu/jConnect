@@ -77,7 +77,7 @@ public class PreferencesStore {
 	}
 
 	public int getTCPPort() {
-		return prefs.getInt(TAG_TCP_PORT, 3019);
+		return prefs.getInt(TAG_TCP_PORT, 45201);
 	}
 	public void setTCPPort(int port) {
 		prefs.putInt(TAG_TCP_PORT, port);
@@ -86,7 +86,7 @@ public class PreferencesStore {
 	
 
 	public int getUDPPort() {
-		return prefs.getInt(TAG_UDP_PORT, 3019);
+		return prefs.getInt(TAG_UDP_PORT, 45202);
 	}
 	public void setUDPPort(int port) {
 		prefs.putInt(TAG_UDP_PORT, port);
@@ -95,7 +95,7 @@ public class PreferencesStore {
 	
 
 	public int getMulticastPort() {
-		return prefs.getInt(TAG_MULTICAST_PORT, 3011);
+		return prefs.getInt(TAG_MULTICAST_PORT, 45203);
 	}
 	public void setMulticastPort(int port) {
 		prefs.putInt(TAG_MULTICAST_PORT, port);
